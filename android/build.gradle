@@ -1,0 +1,30 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.2.1' // Ensure your Android Gradle Plugin version matches
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.buildDir = "../build" // Custom build directory
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}" // Use custom directory structure
+}
+
+subprojects {
+    project.evaluationDependsOn(":app") // Ensure app module builds first
+}
+
+// Task for cleaning the build directory
+tasks.register("clean", Delete) {
+    delete rootProject.buildDir
+}
