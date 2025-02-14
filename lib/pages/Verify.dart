@@ -16,21 +16,31 @@ class Verify extends StatefulWidget {
   State<Verify> createState() => _VerifyState();
 }
 
-
 class _VerifyState extends State<Verify> {
   int secondsRemaining = 59;
   late Timer timer;
   bool invalidOtp = false;
   bool _isLoading = false;
+  bool isButtonActive = false;
 
   final List<TextEditingController> _otpControllers =
-  List.generate(4, (_) => TextEditingController());
+      List.generate(4, (_) => TextEditingController());
   final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
+
+  void _checkOTPComplete() {
+    setState(() {
+      isButtonActive =
+          _otpControllers.every((controller) => controller.text.isNotEmpty);
+    });
+  }
 
   @override
   void initState() {
     super.initState();
     startTimer();
+    for (var controller in _otpControllers) {
+      controller.addListener(_checkOTPComplete);
+    }
   }
 
   @override
@@ -38,6 +48,9 @@ class _VerifyState extends State<Verify> {
     timer.cancel();
     for (var controller in _otpControllers) {
       controller.dispose();
+    }
+    for (var node in _focusNodes) {
+      node.dispose();
     }
     super.dispose();
   }
@@ -54,49 +67,52 @@ class _VerifyState extends State<Verify> {
     });
   }
 
-  bool areFieldsFilled() {
-    return _otpControllers.every((controller) => controller.text.isNotEmpty);
+  void _onKeyPress(String value) {
+    setState(() {
+      if (value == 'backspace') {
+        for (int i = 3; i >= 0; i--) {
+          if (_otpControllers[i].text.isNotEmpty) {
+            _otpControllers[i].clear();
+            _focusNodes[i].requestFocus();
+            break;
+          }
+        }
+      } else {
+        for (int i = 0; i < 4; i++) {
+          if (_otpControllers[i].text.isEmpty) {
+            _otpControllers[i].text = value;
+            if (i < 3) _focusNodes[i + 1].requestFocus();
+            break;
+          }
+        }
+      }
+    });
   }
 
   Future<void> verifyOTP() async {
-    final String apiUrl = "https://greenwallet-app.onrender.com/api/users/verify-otp";
-
     final String enteredOTP = _otpControllers.map((c) => c.text).join();
 
     if (enteredOTP.length != 4) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Please enter the complete OTP.")));
+          const SnackBar(content: Text("Please enter the complete OTP.")));
       return;
     }
 
-    final Map<String, dynamic> otpData = {
-      "email": widget.email,
-      "otp": int.tryParse(enteredOTP) ?? 0
-    };
+    final String apiUrl =
+        "https://greenwallet-app.onrender.com/api/users/send-otp?email=${widget.email}";
 
     try {
-      setState(() {
-        _isLoading = true;
-      });
-
       final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(otpData),
+        Uri.parse(apiUrl), // No need for a request body
+        headers: {"accept": "application/json"},
       );
-
-      setState(() {
-        _isLoading = false;
-      });
 
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        // print("✅ OTP Verified: ${data['message']}");
-
-        // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Check Email For OTP!")));
+          SnackBar(content: Text("OTP Verified! Continue Registration.")),
+        );
 
         // Navigate to the Setup page
         Navigator.pushReplacement(
@@ -104,24 +120,20 @@ class _VerifyState extends State<Verify> {
           MaterialPageRoute(builder: (context) => Setup()),
         );
       } else {
-        print("❌ OTP Verification Failed: ${data['message']}");
+        // print("❌ OTP Verification Failed: ${data['message']}");
 
         setState(() {
           invalidOtp = true;
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(data['message'] ?? "Invalid OTP!")));
+             SnackBar(content: Text(data['message'] ?? "Invalid OTP!")));
       }
     } catch (error) {
-      setState(() {
-        _isLoading = false;
-      });
 
       print("❌ Network Error: $error");
-
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Network error, try again!")));
+          const SnackBar(content: Text("Network error, try again!")));
     }
   }
 
@@ -216,18 +228,13 @@ class _VerifyState extends State<Verify> {
                   children: List.generate(4, (index) => _otpField(index)),
                 ),
                 const SizedBox(height: 10),
-                Text(
-                  invalidOtp ? 'Invalid Otp!' : '',
-                  style: const TextStyle(fontSize: 14, color: Colors.red),
-                ),
                 const SizedBox(height: 30),
                 ElevatedButton(
-                  onPressed: areFieldsFilled() ? verifyOTP : null,
+                  onPressed: isButtonActive ? verifyOTP : null,
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(310, 50),
-                    backgroundColor: areFieldsFilled()
-                        ? const Color(0xFF3F2771)
-                        : Colors.grey,
+                    backgroundColor:
+                        isButtonActive ? const Color(0xFF3F2771) : Colors.grey,
                     // Change color based on field status // Disabled color
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
@@ -240,9 +247,9 @@ class _VerifyState extends State<Verify> {
                   child: _isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
                       : const Text(
-                    "Verify",
-                    style: TextStyle(fontSize: 16, color: Colors.white),
-                  ),
+                          "Verify",
+                          style: TextStyle(fontSize: 16, color: Colors.white),
+                        ),
                 ),
                 const SizedBox(height: 20),
                 Text(
@@ -264,11 +271,11 @@ class _VerifyState extends State<Verify> {
                     TextButton(
                       onPressed: secondsRemaining == 0
                           ? () {
-                        setState(() {
-                          secondsRemaining = 59;
-                          startTimer();
-                        });
-                      }
+                              setState(() {
+                                secondsRemaining = 59;
+                                startTimer();
+                              });
+                            }
                           : null,
                       child: Text(
                         "Resend",
