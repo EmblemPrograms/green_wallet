@@ -6,6 +6,7 @@ import 'package:green_wallet/pages/Startup.dart';
 import 'package:http/http.dart' as http;
 import 'package:green_wallet/pages/Setup.dart';
 import 'package:green_wallet/widgets/textborder.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Verify extends StatefulWidget {
   final String email; // Ensure this is present
@@ -94,46 +95,70 @@ class _VerifyState extends State<Verify> {
 
     if (enteredOTP.length != 4) {
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Please enter the complete OTP.")));
+        const SnackBar(content: Text("Please enter the complete OTP.")),
+      );
       return;
     }
 
     final String apiUrl =
-        "https://greenwallet-app.onrender.com/api/users/send-otp?email=${widget.email}";
+        "https://greenwallet-app.onrender.com/api/users/verify-otp"
+        "?email=${widget.email}&otp=$enteredOTP";
 
     try {
+      FocusScope.of(context).unfocus(); // Hide keyboard before sending request
+
+      setState(() {
+        _isLoading = true;
+      });
+
       final response = await http.post(
-        Uri.parse(apiUrl), // No need for a request body
+        Uri.parse(apiUrl),
         headers: {"accept": "application/json"},
       );
+
+      setState(() {
+        _isLoading = false;
+      });
 
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
+        // ✅ OTP verified successfully
+        String token = data['token']; // Extract token
+
+        // ✅ Save token for later authentication
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString("auth_token", token);
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("OTP Verified! Continue Registration.")),
         );
 
-        // Navigate to the Setup page
+        // Navigate to Setup page
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => Setup()),
         );
       } else {
-        // print("❌ OTP Verification Failed: ${data['message']}");
-
+        // ❌ OTP verification failed
         setState(() {
           invalidOtp = true;
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
-             SnackBar(content: Text(data['message'] ?? "Invalid OTP!")));
+          SnackBar(content: Text(data['message'] ?? "Invalid OTP!")),
+        );
       }
     } catch (error) {
+      setState(() {
+        _isLoading = false;
+      });
 
       print("❌ Network Error: $error");
+
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Network error, try again!")));
+        const SnackBar(content: Text("Network error, try again!")),
+      );
     }
   }
 

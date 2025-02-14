@@ -57,7 +57,7 @@ class _CreateAccountState extends State<CreateAccount> {
 
         // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("OTP sent to email: ${data['otp']}")));
+            SnackBar(content: Text("Registration Successful: User registered. OTP sent to email.")));
 
         // Navigate to OTP verification screen
         Navigator.push(
