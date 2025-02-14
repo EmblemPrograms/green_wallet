@@ -1,7 +1,12 @@
+import 'dart:io';
+
+import 'package:country_picker/country_picker.dart';
 import 'package:green_wallet/pages/Pin_setup.dart';
 import 'package:green_wallet/widgets/textborder.dart';
 import 'package:flutter/material.dart';
-import 'package:green_wallet/pages/Verify.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
 
 import 'Startup.dart';
@@ -15,27 +20,111 @@ class Setup extends StatefulWidget {
 
 class _SetupState extends State<Setup> {
   final TextEditingController _dateController = TextEditingController();
+  final TextEditingController _homeAddressController = TextEditingController();
+  final TextEditingController _stateController = TextEditingController();
+  final TextEditingController _cityController = TextEditingController();
   String? _selectedCountry;
   String? _selectedGender;
   String? _selectedOccupation;
+  bool _isLoading = false;
   final globalKey = GlobalKey<FormState>();
+  File? _selectedFile;
   String? fileName; // Variable to hold the file name
+  Future<void> pickFile() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles();
 
-  // Future<void> pickFile() async {
-  //   try {
-  //     FilePickerResult? result = await FilePicker.platform.pickFiles();
-  //     if (result != null) {
-  //       setState(() {
-  //         fileName = result.files.single.name; // Get the file name
-  //       });
-  //     } else {
-  //       // User canceled the picker
-  //       print("No file selected.");
-  //     }
-  //   } catch (e) {
-  //     print("An error occurred while picking the file: $e");
-  //   }
-  // }
+      if (result != null) {
+        setState(() {
+          _selectedFile = File(result.files.single.path!);
+          fileName = result.files.single.name;
+        });
+      } else {
+        print("❌ No file selected.");
+      }
+    } catch (e) {
+      print("❌ File selection error: $e");
+    }
+  }
+
+  Future<void> updateProfile() async {
+    if (!globalKey.currentState!.validate()) {
+      return; // Stop if form is not valid
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString("auth_token");
+
+      if (token == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Authentication error. Please log in again.")),
+        );
+        return;
+      }
+
+      final String apiUrl =
+          "https://greenwallet-app.onrender.com/api/users/users/profile/update?token=$token";
+
+      var body = jsonEncode({
+        "home_address": _homeAddressController.text,
+        "country": _selectedCountry ?? "",
+        "state": _stateController.text,
+        "city": _cityController.text,
+        "date_of_birth": _dateController.text,
+        "gender": _selectedGender ?? "",
+        "occupation": _selectedOccupation ?? "",
+        "utility_bill": "placeholder_string" // ✅ Save a string instead of a file URL
+      });
+
+      final response = await http.put(
+        Uri.parse(apiUrl),
+        headers: {
+          "accept": "application/json",
+          "Content-Type": "application/json"
+        },
+        body: body,
+      );
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['message'] ?? "Profile updated successfully!")),
+        );
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => PinSetup()),
+        );
+      } else {
+        print("❌ Server Error: ${response.statusCode}");
+        print("❌ Response Body: ${response.body}");
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: ${response.statusCode}, ${response.body}")),
+        );
+      }
+    } catch (error) {
+      setState(() {
+        _isLoading = false;
+      });
+
+      print("❌ Network Error: $error");
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Network error, try again!")),
+      );
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +132,7 @@ class _SetupState extends State<Setup> {
       appBar: AppBar(
         leading: IconButton(
           onPressed: () {
+            FocusScope.of(context).unfocus();
             Navigator.pop(context);
             Navigator.push(
               context,
@@ -118,6 +208,7 @@ class _SetupState extends State<Setup> {
                 ),
                 const SizedBox(height: 5),
                 TextFormField(
+                  controller: _homeAddressController,
                   validator: filltextbox,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
@@ -136,27 +227,37 @@ class _SetupState extends State<Setup> {
                   ),
                 ),
                 const SizedBox(height: 5),
-                DropdownButtonFormField<String>(
-                  value: _selectedCountry, // Replace with your variable
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedCountry = value;
-                    });
+                GestureDetector(
+                  onTap: () {
+                    showCountryPicker(
+                      context: context,
+                      showPhoneCode: false, // Only show country names
+                      onSelect: (Country country) {
+                        setState(() {
+                          _selectedCountry = country.name;
+                        });
+                      },
+                    );
                   },
-                  validator: filltextbox,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 15, vertical: 14),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Color(0xFFE0E0E0)),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    enabledBorder: Bcolor.enabledBorder,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          _selectedCountry ?? "Select your country",
+                          style: const TextStyle(
+                              fontSize: 16, color: Colors.black),
+                        ),
+                        const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                      ],
+                    ),
                   ),
-                  hint: const Text('Enter country'),
-                  items: ['USA', 'Canada', 'India']
-                      .map((country) => DropdownMenuItem<String>(
-                            value: country,
-                            child: Text(country),
-                          ))
-                      .toList(),
                 ),
                 const SizedBox(height: 10),
                 const Text(
@@ -168,6 +269,7 @@ class _SetupState extends State<Setup> {
                 ),
                 const SizedBox(height: 5),
                 TextFormField(
+                  controller: _stateController,
                   validator: filltextbox,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
@@ -187,6 +289,7 @@ class _SetupState extends State<Setup> {
                 ),
                 const SizedBox(height: 5),
                 TextFormField(
+                  controller: _cityController,
                   validator: filltextbox,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
@@ -202,57 +305,44 @@ class _SetupState extends State<Setup> {
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 5),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        decoration: InputDecoration(
-                          hintText: fileName ?? 'Select a file to upload',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          suffixIcon: TextButton(
-                            onPressed: () async {
-                              try {
-                                FilePickerResult? result =
-                                    await FilePicker.platform.pickFiles();
-                                if (result != null) {
-                                  setState(() {
-                                    fileName = result.files.single.name; // Get the file name
-                                  });
-                                } else {
-                                  // User canceled the picker
-                                  print("No file selected.");
-                                }
-                              } catch (e) {
-                                print(
-                                    "An error occurred while picking the file: $e");
-                              }
-                            },
-                            child: const Text(
-                              "Upload",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Color(0xFF3F2771),
-                              ),
-                            ),
+                GestureDetector(
+                  onTap: pickFile, // Calls function when tapped
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 15, vertical: 14),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Color(0xFFE0E0E0)),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(fileName ?? "Select a file to upload"),
+                        const Text(
+                          "Upload",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Color(0xFF3F2771), // Adjust color as needed
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
+                const SizedBox(height: 10),
                 const SizedBox(width: 10),
                 const Text(
                   "Date of Birth",
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                      ),
+                  ),
                 ),
                 const SizedBox(height: 5),
                 TextFormField(
-                  controller: _dateController, // Bind the controller to the field
+                  controller:
+                      _dateController, // Bind the controller to the field
                   readOnly: true, // Prevent manual text input
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -268,7 +358,8 @@ class _SetupState extends State<Setup> {
                       lastDate: DateTime.now(),
                     );
                     if (selectedDate != null) {
-                      _dateController.text = "${selectedDate.toLocal()}".split(' ')[0]; // Format the selected date
+                      _dateController.text = "${selectedDate.toLocal()}"
+                          .split(' ')[0]; // Format the selected date
                     }
                   },
                   decoration: InputDecoration(
@@ -278,7 +369,7 @@ class _SetupState extends State<Setup> {
                     hintText: 'Select your date of birth',
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Colors.grey),
+                      borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
                     ),
                   ),
                 ),
@@ -329,7 +420,7 @@ class _SetupState extends State<Setup> {
                       _selectedOccupation = value;
                     });
                   },
-                  validator: filltextbox,
+                  validator: (value) => value == null ? "Select occupation" : null,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -346,27 +437,22 @@ class _SetupState extends State<Setup> {
                 ),
                 const SizedBox(height: 30),
                 ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => PinSetup(),
-                      ),
-                    );
-                    // Add form submission functionality
-                  },
+                  onPressed: _isLoading ? null : updateProfile,
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 50),
-                    backgroundColor: Colors.grey,
+                    backgroundColor: _isLoading ? Colors.grey : const Color(0xFF3F2771), // Changes color
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
                     ),
                   ),
-                  child: const Text(
-                    'Next',
-                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text(
+                    "Next",
+                    style: TextStyle(color: Colors.white, fontSize: 16),
                   ),
                 ),
+
                 const SizedBox(height: 40),
               ],
             ),
