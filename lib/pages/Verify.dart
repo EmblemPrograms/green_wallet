@@ -1,27 +1,31 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:green_wallet/pages/Create_account.dart';
+import 'package:green_wallet/pages/Startup.dart';
+import 'package:http/http.dart' as http;
 import 'package:green_wallet/pages/Setup.dart';
 import 'package:green_wallet/widgets/textborder.dart';
 
 class Verify extends StatefulWidget {
-  const Verify({super.key});
+  final String email; // Ensure this is present
+
+  const Verify({super.key, required this.email});
 
   @override
   State<Verify> createState() => _VerifyState();
 }
 
+
 class _VerifyState extends State<Verify> {
   int secondsRemaining = 59;
   late Timer timer;
   bool invalidOtp = false;
+  bool _isLoading = false;
 
-  // Controllers for the OTP fields
-  final TextEditingController pin1 = TextEditingController();
-  final TextEditingController pin2 = TextEditingController();
-  final TextEditingController pin3 = TextEditingController();
-  final TextEditingController pin4 = TextEditingController();
+  final List<TextEditingController> _otpControllers =
+  List.generate(4, (_) => TextEditingController());
+  final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
 
   @override
   void initState() {
@@ -32,10 +36,9 @@ class _VerifyState extends State<Verify> {
   @override
   void dispose() {
     timer.cancel();
-    pin1.dispose();
-    pin2.dispose();
-    pin3.dispose();
-    pin4.dispose();
+    for (var controller in _otpControllers) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -50,21 +53,88 @@ class _VerifyState extends State<Verify> {
       }
     });
   }
+
   bool areFieldsFilled() {
-    return pin1.text.isNotEmpty &&
-        pin2.text.isNotEmpty &&
-        pin3.text.isNotEmpty &&
-        pin4.text.isNotEmpty;
+    return _otpControllers.every((controller) => controller.text.isNotEmpty);
   }
+
+  Future<void> verifyOTP() async {
+    final String apiUrl = "https://greenwallet-app.onrender.com/api/users/verify-otp";
+
+    final String enteredOTP = _otpControllers.map((c) => c.text).join();
+
+    if (enteredOTP.length != 4) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Please enter the complete OTP.")));
+      return;
+    }
+
+    final Map<String, dynamic> otpData = {
+      "email": widget.email,
+      "otp": int.tryParse(enteredOTP) ?? 0
+    };
+
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(otpData),
+      );
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        // print("✅ OTP Verified: ${data['message']}");
+
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Check Email For OTP!")));
+
+        // Navigate to the Setup page
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => Setup()),
+        );
+      } else {
+        print("❌ OTP Verification Failed: ${data['message']}");
+
+        setState(() {
+          invalidOtp = true;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(data['message'] ?? "Invalid OTP!")));
+      }
+    } catch (error) {
+      setState(() {
+        _isLoading = false;
+      });
+
+      print("❌ Network Error: $error");
+
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Network error, try again!")));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           onPressed: () {
+            Navigator.pop(context);
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => CreateAccount()),
+              MaterialPageRoute(builder: (context) => Startup()),
             );
           },
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
@@ -127,8 +197,8 @@ class _VerifyState extends State<Verify> {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  "Please enter the OTP sent to the email address\n"
-                      "you provided to verify your email address",
+                  "Verifying OTP for ${widget.email}",
+                  // Show email from CreateAccount
                   textAlign: TextAlign.start,
                   style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                 ),
@@ -143,12 +213,7 @@ class _VerifyState extends State<Verify> {
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _otpField(pin1),
-                    _otpField(pin2),
-                    _otpField(pin3),
-                    _otpField(pin4),
-                  ],
+                  children: List.generate(4, (index) => _otpField(index)),
                 ),
                 const SizedBox(height: 10),
                 Text(
@@ -157,28 +222,13 @@ class _VerifyState extends State<Verify> {
                 ),
                 const SizedBox(height: 30),
                 ElevatedButton(
-                  onPressed: () {
-                    final otp =
-                        pin1.text + pin2.text + pin3.text + pin4.text;
-                    if (otp == "1234") {
-                      setState(() {
-                        invalidOtp = false;
-                      });
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const Setup()),
-                      );
-                    } else {
-                      setState(() {
-                        invalidOtp = true;
-                      });
-                    }
-                  },
+                  onPressed: areFieldsFilled() ? verifyOTP : null,
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(310, 50),
                     backgroundColor: areFieldsFilled()
-                      ? const Color(0xFF3F2771)
-                      : Colors.grey, // Change color based on field status // Disabled color
+                        ? const Color(0xFF3F2771)
+                        : Colors.grey,
+                    // Change color based on field status // Disabled color
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
                     ),
@@ -187,7 +237,9 @@ class _VerifyState extends State<Verify> {
                       horizontal: 20,
                     ),
                   ),
-                  child: const Text(
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text(
                     "Verify",
                     style: TextStyle(fontSize: 16, color: Colors.white),
                   ),
@@ -238,19 +290,13 @@ class _VerifyState extends State<Verify> {
     );
   }
 
-  Widget _otpField(TextEditingController controller) {
+  Widget _otpField(int index) {
     return SizedBox(
       width: 50,
       height: 60,
       child: TextFormField(
-        controller: controller,
-        onChanged: (value) {
-          if (value.length == 1) {
-            FocusScope.of(context).nextFocus();
-          } else if (value.isEmpty) {
-            FocusScope.of(context).previousFocus();
-          }
-        },
+        controller: _otpControllers[index],
+        focusNode: _focusNodes[index],
         textAlign: TextAlign.center,
         style: const TextStyle(fontSize: 24),
         keyboardType: TextInputType.number,
@@ -258,14 +304,18 @@ class _VerifyState extends State<Verify> {
           LengthLimitingTextInputFormatter(1),
           FilteringTextInputFormatter.digitsOnly,
         ],
+        onChanged: (value) {
+          if (value.isNotEmpty && index < 3) {
+            FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
+          }
+        },
+        onEditingComplete: () {
+          if (index > 0 && _otpControllers[index].text.isEmpty) {
+            FocusScope.of(context).requestFocus(_focusNodes[index - 1]);
+          }
+        },
         decoration: InputDecoration(
-          hintText: "0",
-          hintStyle: const TextStyle(color: Colors.grey),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.grey[300]!),
             borderRadius: BorderRadius.circular(8),
           ),
         ),

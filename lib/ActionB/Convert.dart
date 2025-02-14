@@ -25,14 +25,16 @@ class _ConvertState extends State<Convert> {
   }
 
   Future<void> _fetchExchangeRate() async {
-    const String apiKey = "256793736a60aaa5c15d2df9"; // Replace with a real API key
+    const String apiKey =
+        "256793736a60aaa5c15d2df9"; // Replace with a real API key
     const String url = "https://v6.exchangerate-api.com/v6/$apiKey/latest/USD";
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
-          _exchangeRate = data["conversion_rates"]["NGN"] ?? 1660.0; // Update exchange rate
+          _exchangeRate =
+              data["conversion_rates"]["NGN"] ?? 1660.0; // Update exchange rate
           _isLoading = false;
         });
       } else {
@@ -61,6 +63,7 @@ class _ConvertState extends State<Convert> {
       }
     });
   }
+
   void _goToReviewPage() {
     Navigator.push(
       context,
@@ -72,7 +75,9 @@ class _ConvertState extends State<Convert> {
         ),
       ),
     );
-  }  @override
+  }
+
+  @override
   void dispose() {
     _ngnController.dispose();
     super.dispose();
@@ -107,15 +112,20 @@ class _ConvertState extends State<Convert> {
             const SizedBox(height: 20),
 
             // NGN Input (User Enters Amount)
-            _buildCurrencyInput("NGN", "Nigerian Naira", "assets/ngn_flag.png", _ngnController, isEditable: true),
+            _buildCurrencyInput(
+                "NGN", "Nigerian Naira", "assets/ngn_flag.png", _ngnController,
+                isEditable: true),
 
             // Exchange Rate Badge
             _isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : _buildExchangeRateBadge("1 USD = ${_exchangeRate.toStringAsFixed(2)} NGN"),
-          SizedBox(height: 10),
+                : _buildExchangeRateBadge(
+                    "1 USD = ${_exchangeRate.toStringAsFixed(2)} NGN"),
+            SizedBox(height: 10),
             // USD Input (Auto Calculated)
-            _buildCurrencyInput("USD", "United States Dollar", "assets/us_flag.png", null, isEditable: false),
+            _buildCurrencyInput(
+                "USD", "United States Dollar", "assets/us_flag.png", null,
+                isEditable: false),
 
             const Spacer(),
 
@@ -128,8 +138,8 @@ class _ConvertState extends State<Convert> {
     );
   }
 
-  Widget _buildCurrencyInput(
-      String currency, String country, String asset, TextEditingController? controller,
+  Widget _buildCurrencyInput(String currency, String country, String asset,
+      TextEditingController? controller,
       {required bool isEditable}) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -146,8 +156,11 @@ class _ConvertState extends State<Convert> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(currency, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              Text(country, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+              Text(currency,
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold)),
+              Text(country,
+                  style: const TextStyle(fontSize: 12, color: Colors.grey)),
             ],
           ),
           const Spacer(),
@@ -155,19 +168,21 @@ class _ConvertState extends State<Convert> {
             width: 120,
             child: isEditable
                 ? TextField(
-              controller: controller,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                hintText: "Enter Amount",
-                border: InputBorder.none,
-              ),
-              style: const TextStyle(fontSize: 14),
-            )
+                    controller: controller,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      hintText: "Enter Amount",
+                      border: InputBorder.none,
+                    ),
+                    style: const TextStyle(fontSize: 14),
+                  )
                 : Text(
-              _usdAmount.toStringAsFixed(2), // Display converted USD amount
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.right,
-            ),
+                    _usdAmount
+                        .toStringAsFixed(2), // Display converted USD amount
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.right,
+                  ),
           ),
         ],
       ),

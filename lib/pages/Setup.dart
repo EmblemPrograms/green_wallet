@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:green_wallet/pages/Verify.dart';
 import 'package:file_picker/file_picker.dart';
 
+import 'Startup.dart';
+
 class Setup extends StatefulWidget {
   const Setup({super.key});
 
@@ -41,9 +43,10 @@ class _SetupState extends State<Setup> {
       appBar: AppBar(
         leading: IconButton(
           onPressed: () {
+            Navigator.pop(context);
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => Verify()),
+              MaterialPageRoute(builder: (context) => Startup()),
             );
           },
           icon: Icon(Icons.arrow_back_ios_new_rounded),

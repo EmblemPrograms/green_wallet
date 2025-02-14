@@ -1,9 +1,9 @@
 import 'dart:convert';
+import 'package:green_wallet/pages/verify.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:green_wallet/widgets/textborder.dart';
 import 'package:green_wallet/pages/startup.dart';
-import 'package:green_wallet/pages/verify.dart';
 import 'package:green_wallet/pages/Signin.dart';
 import 'package:country_picker/country_picker.dart';
 
@@ -25,14 +25,15 @@ class _CreateAccountState extends State<CreateAccount> {
 
   Future<void> registerUser() async {
     final String apiUrl =
-        "http://192.168.43.78:5000/api/users/auth/register"; // Change this to your API URL
+        "https://greenwallet-app.onrender.com/api/users/auth/register";
+    final String userEmail = _emailController.text.trim(); // Store email entered
 
     final Map<String, dynamic> userData = {
-      "firstName": _firstNameController.text.trim(),
-      "lastName": _lastNameController.text.trim(),
-      "email": _emailController.text.trim(),
-      "phone": "$_selectedCountryCode${_phoneController.text.trim()}",
-      "password": _passwordController.text
+      "first_name": _firstNameController.text.trim(),
+      "last_name": _lastNameController.text.trim(),
+      "email": userEmail,
+      "phone_number": "$_selectedCountryCode${_phoneController.text.trim()}",
+      "password": _passwordController.text.trim()
     };
 
     try {
@@ -51,10 +52,20 @@ class _CreateAccountState extends State<CreateAccount> {
         _isLoading = false;
       });
 
-      if (response.statusCode == 201) {
+      if (response.statusCode == 200) {
         print("✅ Registration Successful: ${data['message']}");
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text("Registration successful!")));
+
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("OTP sent to email: ${data['otp']}")));
+
+        // Navigate to OTP verification screen
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Verify(email: userEmail),
+          ),
+        );
       } else {
         print("❌ Registration Failed: ${data['message']}");
         ScaffoldMessenger.of(context).showSnackBar(
@@ -247,6 +258,7 @@ class _CreateAccountState extends State<CreateAccount> {
                       child: TextFormField(
                         controller: _phoneController,
                         keyboardType: TextInputType.phone,
+                        maxLength: 10,
                         validator: filltextbox,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(
@@ -254,6 +266,7 @@ class _CreateAccountState extends State<CreateAccount> {
                           ),
                           enabledBorder: Bcolor.enabledBorder,
                           hintText: 'Mobile number',
+                          counterText: "",
                         ),
                       ),
                     ),
@@ -354,12 +367,8 @@ class _CreateAccountState extends State<CreateAccount> {
                           if (globalKey.currentState!.validate()) {
                             // Corrected validation logic
                             registerUser();
-                          } // Call the registration function
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => Verify()));
-                          // Proceed to the next step
+                            // Proceed to the next step
+                          }
                         }
                       : null,
                   style: ElevatedButton.styleFrom(
