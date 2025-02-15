@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:green_wallet/pages/Setup_pin.dart';
 import 'package:green_wallet/Card/hompage.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SelectPin extends StatefulWidget {
   const SelectPin({super.key});
@@ -10,13 +13,16 @@ class SelectPin extends StatefulWidget {
 }
 
 class _SelectPinState extends State<SelectPin> {
-  final List<TextEditingController> _controllers = List.generate(4, (_) => TextEditingController());
+  final List<TextEditingController> _controllers =
+      List.generate(4, (_) => TextEditingController());
   final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
   bool isButtonActive = false;
+  bool _isLoading = false; // ✅ Add loading state
 
   void _checkPinComplete() {
     setState(() {
-      isButtonActive = _controllers.every((controller) => controller.text.isNotEmpty);
+      isButtonActive =
+          _controllers.every((controller) => controller.text.isNotEmpty);
     });
   }
 
@@ -37,6 +43,103 @@ class _SelectPinState extends State<SelectPin> {
       node.dispose();
     }
     super.dispose();
+  }
+
+  Future<void> _savePin() async {
+    if (!isButtonActive) return; // Prevents clicking when PIN is incomplete
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    final String pin =
+        _controllers.map((c) => c.text).join(); // Combine PIN digits
+
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString("auth_token");
+
+      if (token == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text("Authentication error. ")),
+        );
+        return;
+      }
+
+      final String apiUrl =
+          "https://greenwallet-app.onrender.com/api/users/users/pin/set?token=$token";
+
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {
+          "accept": "application/json",
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({"pin": pin}),
+      );
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        String fullName = data['user']['full_name'] ?? "User";
+        await prefs.setString("full_name", fullName);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['message'] ?? "PIN set successfully!")),
+        );
+
+        showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (context) {
+                return Dialog(
+                  backgroundColor: Colors.transparent,
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: Color(0xFF3F2771),
+                    ),
+                  ),
+                );
+              },
+            );
+
+            // Simulate loading
+            await Future.delayed(Duration(seconds: 2));
+        // ✅ Navigate to the homepage
+        Navigator.of(context).pop(); // Close the loading dialog
+        // Show CustomDialogWidget
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => CustomDialogWidget(),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => hompage()),
+        );
+      } else {
+        print("❌ Server Error: ${response.statusCode}");
+        print("❌ Response Body: ${response.body}");
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text("Error: ${response.statusCode}, ${response.body}")),
+        );
+      }
+    } catch (error) {
+      setState(() {
+        _isLoading = false;
+      });
+
+      print("❌ Network Error: $error");
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Network error, try again!")),
+      );
+    }
   }
 
   void _onKeyPress(String value) {
@@ -140,51 +243,51 @@ class _SelectPinState extends State<SelectPin> {
 
             // "Next" Button
             ElevatedButton(
-              onPressed: isButtonActive
-                  ? () async {
-                // Handle PIN submission
-                final pin = _controllers.map((c) => c.text).join();
-                print("Entered PIN: $pin");
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (context) {
-                    return Dialog(
-                      backgroundColor: Colors.transparent,
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: Color(0xFF3F2771),
-                        ),
-                      ),
-                    );
-                  },
-                );
-
-                // Simulate loading
-                await Future.delayed(Duration(seconds: 2));
-                Navigator.of(context).pop(); // Close the loading dialog
-
-                // Show CustomDialogWidget
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (context) => CustomDialogWidget(),
-                );
-              }
-                  : null,
+              onPressed: _isLoading ? null : _savePin, // ✅ Call API function
+              // onPressed: isButtonActive
+              //     ? () async {
+              //   // Handle PIN submission
+              //   final pin = _controllers.map((c) => c.text).join();
+              //   print("Entered PIN: $pin");
+              //   showDialog(
+              //     context: context,
+              //     barrierDismissible: false,
+              //     builder: (context) {
+              //       return Dialog(
+              //         backgroundColor: Colors.transparent,
+              //         child: Center(
+              //           child: CircularProgressIndicator(
+              //             color: Color(0xFF3F2771),
+              //           ),
+              //         ),
+              //       );
+              //     },
+              //   );
+              //
+              //   // Simulate loading
+              //   await Future.delayed(Duration(seconds: 2));
+              //   Navigator.of(context).pop(); // Close the loading dialog
+              //
+              //   // Show CustomDialogWidget
+              //   showDialog(
+              //     context: context,
+              //     barrierDismissible: false,
+              //     builder: (context) => CustomDialogWidget(),
+              //   );
+              // }
+              //     : null,
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
-                backgroundColor: isButtonActive
-                    ? const Color(0xFF3F2771)
-                    : Colors.grey,
+                backgroundColor:
+                    isButtonActive ? const Color(0xFF3F2771) : Colors.grey,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(25),
                 ),
               ),
-              child: const Text(
-                "Next",
-                style: TextStyle(fontSize: 16, color: Colors.white),
-              ),
+              child: _isLoading
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text("Next",
+                      style: TextStyle(fontSize: 16, color: Colors.white)),
             ),
             const SizedBox(height: 20),
 
@@ -214,8 +317,8 @@ class _SelectPinState extends State<SelectPin> {
                     onTap: keyValue.isEmpty
                         ? null
                         : () {
-                      _onKeyPress(keyValue);
-                    },
+                            _onKeyPress(keyValue);
+                          },
                     child: Container(
                       decoration: BoxDecoration(
                         color: keyValue == 'backspace'
@@ -228,12 +331,12 @@ class _SelectPinState extends State<SelectPin> {
                       child: keyValue == 'backspace'
                           ? const Icon(Icons.backspace_outlined, size: 24)
                           : Text(
-                        keyValue,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                              keyValue,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                     ),
                   );
                 },
@@ -255,7 +358,8 @@ class CustomDialogWidget extends StatelessWidget {
       if (context.mounted) {
         Navigator.of(context).pop(); // Close the dialog
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => hompage()), // Pass required parameter
+          MaterialPageRoute(
+              builder: (context) => hompage()), // Pass required parameter
         );
       }
     });

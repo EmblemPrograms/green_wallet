@@ -62,7 +62,7 @@ class _SetupState extends State<Setup> {
 
       if (token == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Authentication error. Please log in again.")),
+          const SnackBar(content: Text("Authentication error. ")),
         );
         return;
       }
