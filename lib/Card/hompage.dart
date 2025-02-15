@@ -4,6 +4,7 @@ import 'package:green_wallet/Card/Invoice.dart';
 import 'package:green_wallet/Card/VCard.dart';
 import 'package:green_wallet/Card/Profile.dart';
 import 'package:green_wallet/widgets/Navigation_bar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'Virtual.dart';
 
 // Helper method for bottom navigation items
@@ -92,6 +93,21 @@ class homepage extends StatefulWidget {
 
 class _homepageState extends State<homepage> {
   bool _isObscured = true;
+  String _fullName = "Loading..."; // Default value
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFullName();
+  }
+  Future<void> _loadFullName() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _fullName = prefs.getString("full_name") ?? "User";
+    });
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -116,14 +132,14 @@ class _homepageState extends State<homepage> {
                       const SizedBox(width: 10),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
+                        children: [
                           Text(
                             "Good Morning",
                             style: TextStyle(color: Colors.white, fontSize: 12),
                           ),
                           SizedBox(height: 4),
                           Text(
-                            "Olajide Fawwas",
+                            _fullName,
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 16,
