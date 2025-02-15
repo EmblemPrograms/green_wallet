@@ -1,5 +1,6 @@
-🟢 Green Wallet – Secure & Smart Banking App
-Green Wallet is a modern financial technology (FinTech) application designed for seamless banking with both Naira and Dollar accounts. It offers a secure, efficient, and user-friendly experience, including virtual card services and real-time transactions.
+# 🟢 Green Wallet – Secure & Smart Banking App
+
+## Green Wallet is a modern financial technology (FinTech) application designed for seamless banking with both Naira and Dollar accounts. It offers a secure, efficient, and user-friendly experience, including virtual card services and real-time transactions.
 
 ✨ Features
 ✅ Multi-Currency Accounts – Manage Naira & Dollar accounts effortlessly.
