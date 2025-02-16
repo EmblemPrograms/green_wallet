@@ -1,6 +1,9 @@
 import 'package:green_wallet/pages/Startup.dart';
 import 'package:green_wallet/pages/Create_account.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:green_wallet/Card/hompage.dart';
 
 class Signin extends StatefulWidget {
@@ -11,16 +14,121 @@ class Signin extends StatefulWidget {
 }
 
 class _SigninState extends State<Signin> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   bool isChecked = false; // Checkbox state
   bool _isObscured = true;
+  bool _isLoading = false;
+  Future<void> _login() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final String email = _emailController.text.trim();
+    final String password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter email and password.")),
+      );
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
+    final String apiUrl = "https://greenwallet-app.onrender.com/api/users/login";
+
+    try {
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"email": email, "password": password}),
+      );
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        String token = data["access_token"];
+
+        // ✅ Store token in SharedPreferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString("auth_token", token);
+
+        // ✅ Fetch and Save Full Name
+        await _fetchUserProfile(token);
+        if (context.mounted) {
+          Navigator.of(context).pop();
+        }
+
+        // Show CustomDialogWidget
+        if (context.mounted) {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => CustomDialogWidget(),
+          );
+        }
+        // ✅ Navigate to homepage
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => hompage()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Login failed: ${response.body}")),
+        );
+      }
+    } catch (error) {
+      setState(() {
+        _isLoading = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Network error, try again!")),
+      );
+    }
+  }
+
+  Future<void> _fetchUserProfile(String token) async {
+    final String apiUrl = "https://greenwallet-app.onrender.com/api/users/profile"; // Adjust based on your backend
+
+    try {
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Accept": "application/json",
+        },
+      );
+
+      print("🔹 Server Response Code: ${response.statusCode}");
+      print("🔹 Server Response Body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        String fullName = data['full_name'] ?? "User";
+
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString("full_name", fullName);
+      } else {
+        print("❌ Failed to fetch user profile: ${response.body}");
+      }
+    } catch (error) {
+      print("❌ Error fetching user profile: $error");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           onPressed: () {
-            Navigator.push(
-                context, MaterialPageRoute(builder: (context) => Startup()));
+            Navigator.pop(context);
           },
           icon: Icon(Icons.arrow_back_ios_new_rounded),
         ),
@@ -57,6 +165,7 @@ class _SigninState extends State<Signin> {
               ),
               const SizedBox(height: 10),
               TextFormField(
+                controller: _emailController,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
                     borderSide: const BorderSide(
@@ -84,6 +193,7 @@ class _SigninState extends State<Signin> {
               ),
               const SizedBox(height: 10),
               TextFormField(
+                controller: _passwordController,
                 obscureText: _isObscured,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
@@ -165,45 +275,46 @@ class _SigninState extends State<Signin> {
               ),
               const SizedBox(height: 30),
               ElevatedButton(
-                onPressed: () async {
-                  // Show loading dialog
-                  showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (context) {
-                      return Dialog(
-                        backgroundColor: Colors.transparent,
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            color: Color(0xFF3F2771),
-                          ),
-                        ),
-                      );
-                    },
-                  );
-
-                  try {
-                    // Simulate loading
-                    await Future.delayed(Duration(seconds: 2));
-
-                    // Close the loading dialog
-                    if (context.mounted) {
-                      Navigator.of(context).pop();
-                    }
-
-                    // Show CustomDialogWidget
-                    if (context.mounted) {
-                      showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (context) => CustomDialogWidget(),
-                      );
-                    }
-                  } catch (e) {
-                    // Handle any errors here, if needed
-                    print("Error occurred: $e");
-                  }
-                },
+                onPressed: _isLoading ? null : _login, // ✅ Call _login function
+                // onPressed: () async {
+                //   // Show loading dialog
+                //   showDialog(
+                //     context: context,
+                //     barrierDismissible: false,
+                //     builder: (context) {
+                //       return Dialog(
+                //         backgroundColor: Colors.transparent,
+                //         child: Center(
+                //           child: CircularProgressIndicator(
+                //             color: Color(0xFF3F2771),
+                //           ),
+                //         ),
+                //       );
+                //     },
+                //   );
+                //
+                //   try {
+                //     // Simulate loading
+                //     await Future.delayed(Duration(seconds: 2));
+                //
+                //     // Close the loading dialog
+                //     if (context.mounted) {
+                //       Navigator.of(context).pop();
+                //     }
+                //
+                //     // Show CustomDialogWidget
+                //     if (context.mounted) {
+                //       showDialog(
+                //         context: context,
+                //         barrierDismissible: false,
+                //         builder: (context) => CustomDialogWidget(),
+                //       );
+                //     }
+                //   } catch (e) {
+                //     // Handle any errors here, if needed
+                //     print("Error occurred: $e");
+                //   }
+                // },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF3F2771),
                   minimumSize: const Size.fromHeight(50),
@@ -211,13 +322,9 @@ class _SigninState extends State<Signin> {
                     borderRadius: BorderRadius.circular(25),
                   ),
                 ),
-                child: const Text(
-                  "Login",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white,
-                  ),
-                ),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text("Login", style: TextStyle(fontSize: 16, color: Colors.white)),
               ),
               const SizedBox(height: 20),
               Center(
