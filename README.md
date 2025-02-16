@@ -4,9 +4,13 @@
 
 ✨ Features
 ✅ Multi-Currency Accounts – Manage Naira & Dollar accounts effortlessly.
+
 ✅ Virtual Card Integration – Secure online transactions with virtual cards.
+
 ✅ Fast & Secure Transactions – Instant deposits, withdrawals, and transfers.
+
 ✅ User-Friendly UI – Intuitive and responsive design for easy navigation.
+
 ✅ Email & OTP Verification – Enhanced security for account protection.
 
 🚀 Tech Stack
