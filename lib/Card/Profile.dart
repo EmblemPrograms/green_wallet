@@ -97,9 +97,9 @@ class _ProfileState extends State<Profile> {
                           );
 
                           // Simulate loading
-                          await Future.delayed(Duration(seconds: 2));
-                          Navigator.of(context).pop();
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => const Startup()),);
+                          // await Future.delayed(Duration(seconds: 2));
+                          // Navigator.of(context).pop();
+                          // Navigator.push(context, MaterialPageRoute(builder: (context) => const Startup()),);
                         },
                         child: const Text(
                           "Log Out",

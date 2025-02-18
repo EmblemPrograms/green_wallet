@@ -24,7 +24,7 @@ class _CreateAccountState extends State<CreateAccount> {
   bool _isLoading = false;
 
   Future<void> registerUser() async {
-    final String apiUrl =
+    const String apiUrl =
         "https://greenwallet-app.onrender.com/api/users/auth/register";
     final String userEmail = _emailController.text.trim(); // Store email entered
 
@@ -74,7 +74,7 @@ class _CreateAccountState extends State<CreateAccount> {
     } catch (error) {
       print("❌ Error: $error");
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("Network error, try again!")));
+          .showSnackBar(SnackBar(content: Text("❌ Error: $error")));
     }
   }
 

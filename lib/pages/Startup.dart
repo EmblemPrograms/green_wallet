@@ -19,12 +19,12 @@ class _StartupState extends State<Startup> {
       "Make international payments to local bank accounts almost immediately",
     },
     {
-      "image": "assets/Frame1.png",
+      "image": "assets/Frame2.png",
       "title": "More countries, More Access, More Reach",
       "subtitle": "Send money for transactions in their local currencies.",
     },
     {
-      "image": "assets/Frame1.png",
+      "image": "assets/Frame3.png",
       "title": "Safe and Seamless Transactions",
       "subtitle": "Your transactions and personal data are securely protected.",
     },

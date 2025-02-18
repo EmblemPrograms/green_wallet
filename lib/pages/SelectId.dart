@@ -42,9 +42,9 @@ class _SelectidState extends State<Selectid> {
             Expanded(
               child: ListView(
                 children: [
-                  _buildListTile("Passport"),
-                  _buildListTile("Drivers Licence"),
-                  _buildListTile("NIN"),
+                  _buildListTile("National Id Card"),
+                  _buildListTile("Driver's Licence"),
+                  _buildListTile("NIN Slip"),
                   _buildListTile("Voter’s Card"),
                   _buildListTile("International Passport"),
                 ],
