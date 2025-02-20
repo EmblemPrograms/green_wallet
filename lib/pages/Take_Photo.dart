@@ -28,7 +28,7 @@ class _TakePhotoState extends State<TakePhoto> {
         title: Column(
           children: [
             Text(
-              "Passport",
+              "International Passport",
               style: TextStyle(
                 color: Colors.black,
                 fontSize: 18,

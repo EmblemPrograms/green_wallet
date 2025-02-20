@@ -63,10 +63,7 @@ class _ContinueState extends State<Continue> {
               padding: EdgeInsets.all(16),
               child: Column(
                 children: [
-                  _buildVerificationStep(
-                    icon: Icons.image,
-                    text: "Upload photos of document proving your identity",
-                  ),
+
                   const SizedBox(height: 35),
                   _buildVerificationStep(
                     icon: Icons.image,
@@ -106,21 +103,26 @@ class _ContinueState extends State<Continue> {
   }
 
   Widget _buildVerificationStep({required IconData icon, required String text}) {
-    return Row(
-      children: [
-        CircleAvatar(
-          radius: 20,
-          backgroundColor: Colors.purple.shade100,
-          child: Icon(icon, color: Colors.purple, size: 24),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            text,
-            style: TextStyle(fontSize: 16, color: Colors.black87),
+    return Padding(
+      padding: const EdgeInsets.only(
+        left: 50
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 20,
+            backgroundColor: Colors.purple.shade100,
+            child: Icon(icon, color: Colors.purple, size: 30),
           ),
-        ),
-      ],
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(fontSize: 16, color: Colors.black87, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

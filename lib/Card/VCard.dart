@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:green_wallet/widgets/Navigation_bar.dart';
 import 'package:green_wallet/Card/hompage.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import 'Invoice.dart';
 import 'Profile.dart';
 
@@ -49,6 +49,20 @@ class VCard extends StatefulWidget {
 }
 
 class _VCardState extends State<VCard> {
+  String _fullName = "Loading..."; // ✅ Declare _fullName
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserName();
+  }
+
+  Future<void> _loadUserName() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _fullName = prefs.getString("full_name") ?? "User"; // ✅ Load name dynamically
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -141,8 +155,8 @@ class _VCardState extends State<VCard> {
             left: 16,
             child: Row(
               children: [
-                const Text(
-                  "ABDUL GAFAR",
+                Text(
+                  _fullName,
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 16,

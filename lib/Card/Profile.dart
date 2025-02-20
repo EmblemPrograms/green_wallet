@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:green_wallet/pages/Startup.dart';
 import 'package:green_wallet/widgets/Navigation_bar.dart';
 import 'package:green_wallet/Card/Invoice.dart';
 import 'package:green_wallet/Card/VCard.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'hompage.dart';
 
@@ -30,6 +30,8 @@ class _ProfilePState extends State<ProfileP> {
       _selectedIndex = index;
     });
   }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,6 +52,21 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+  String _fullName = "Loading..."; // ✅ Declare _fullName
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserName();
+  }
+
+  Future<void> _loadUserName() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _fullName = prefs.getString("full_name") ?? "User"; // ✅ Load name dynamically
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -81,20 +98,20 @@ class _ProfileState extends State<Profile> {
                     Center(
                       child: TextButton(
                         onPressed: () async {
-                          showDialog(
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (context) {
-                              return Dialog(
-                                backgroundColor: Colors.transparent,
-                                child: Center(
-                                  child: CircularProgressIndicator(
-                                    color: Color(0xFF3F2771),
-                                  ),
-                                ),
-                              );
-                            },
-                          );
+                          // showDialog(
+                          //   context: context,
+                          //   barrierDismissible: false,
+                          //   builder: (context) {
+                          //     return Dialog(
+                          //       backgroundColor: Colors.transparent,
+                          //       child: Center(
+                          //         child: CircularProgressIndicator(
+                          //           color: Color(0xFF3F2771),
+                          //         ),
+                          //       ),
+                          //     );
+                          //   },
+                          // );
 
                           // Simulate loading
                           // await Future.delayed(Duration(seconds: 2));
@@ -131,8 +148,8 @@ class _ProfileState extends State<Profile> {
             radius: 30,
           ),
           const SizedBox(height: 8),
-          const Text(
-            "Abdul Gafar",
+          Text(
+            _fullName,
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           const Text(

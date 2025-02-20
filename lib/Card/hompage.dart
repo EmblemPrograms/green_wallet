@@ -41,25 +41,6 @@ class _hompageState extends State<hompage> {
         selectedIndex: _selectedIndex,
         onItemSelected: _onNavItemTapped,
       ),
-      // bottomNavigationBar: BottomAppBar(
-      //   height: 70,
-      //   shape: const CircularNotchedRectangle(),
-      //   // Adds notch for FloatingActionButton
-      //   notchMargin: 8.0,
-      //   color: Colors.white,
-      //   child: Padding(
-      //     padding: const EdgeInsets.symmetric(horizontal: 2),
-      //     child: Row(
-      //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      //       children: [
-      //         _buildBottomNavItem(Icons.home_rounded, "Home", 0),
-      //         _buildBottomNavItem(Icons.credit_card, "Card", 1),
-      //         _buildBottomNavItem(Icons.edit_calendar_rounded, "Invoice", 2),
-      //         _buildBottomNavItem(Icons.account_balance, "Account", 3),
-      //       ],
-      //     ),
-      //   ),
-      // ),
     );
   }
 }

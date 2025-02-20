@@ -74,7 +74,7 @@ class _CreateAccountState extends State<CreateAccount> {
     } catch (error) {
       print("❌ Error: $error");
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("❌ Error: $error")));
+          .showSnackBar(SnackBar(content: Text("Network Error. Try Again")));
     }
   }
 
@@ -380,10 +380,10 @@ class _CreateAccountState extends State<CreateAccount> {
                       borderRadius: BorderRadius.circular(25),
                     ),
                   ),
-                  child: const Text(
-                    "Next",
-                    style: TextStyle(fontSize: 16, color: Colors.white),
-                  ),
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text("Next",
+                      style: TextStyle(fontSize: 16, color: Colors.white)),
                 ),
                 const SizedBox(height: 10),
 
