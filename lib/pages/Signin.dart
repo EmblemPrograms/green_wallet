@@ -1,4 +1,3 @@
-import 'package:green_wallet/pages/Startup.dart';
 import 'package:green_wallet/pages/Create_account.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -37,7 +36,8 @@ class _SigninState extends State<Signin> {
       return;
     }
 
-    final String apiUrl = "https://greenwallet-app.onrender.com/api/users/login";
+    final String apiUrl =
+        "https://greenwallet-app.onrender.com/api/users/login";
 
     try {
       final response = await http.post(
@@ -94,8 +94,8 @@ class _SigninState extends State<Signin> {
   }
 
   Future<void> _fetchUserProfile(String token) async {
-    final String apiUrl = "https://greenwallet-app.onrender.com/api/users/profile"; // Adjust based on your backend
-
+    final String apiUrl =
+        "https://greenwallet-app.onrender.com/api/users/profile"; // Adjust based on your backend
     try {
       final response = await http.get(
         Uri.parse(apiUrl),
@@ -176,7 +176,8 @@ class _SigninState extends State<Signin> {
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
                     borderSide: BorderSide(
-                      color: Colors.grey[300] ?? Colors.grey, // Border color when not focused
+                      color: Colors.grey[300] ??
+                          Colors.grey, // Border color when not focused
                       width: 1.0, // Border width
                     ),
                   ),
@@ -206,13 +207,16 @@ class _SigninState extends State<Signin> {
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
                     borderSide: BorderSide(
-                      color: Colors.grey[300] ?? Colors.grey, // Border color when not focused
+                      color: Colors.grey[300] ??
+                          Colors.grey, // Border color when not focused
                       width: 1.0, // Border width
                     ),
                   ),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _isObscured ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                      _isObscured
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
                       color: Colors.grey,
                     ),
                     onPressed: () {
@@ -231,7 +235,9 @@ class _SigninState extends State<Signin> {
                 children: [
                   Row(
                     children: [
-                      SizedBox(width: 24, height: 24,
+                      SizedBox(
+                        width: 24,
+                        height: 24,
                         child: Checkbox(
                           value: isChecked,
                           onChanged: (bool? value) {
@@ -276,45 +282,7 @@ class _SigninState extends State<Signin> {
               const SizedBox(height: 30),
               ElevatedButton(
                 onPressed: _isLoading ? null : _login, // ✅ Call _login function
-                // onPressed: () async {
-                //   // Show loading dialog
-                //   showDialog(
-                //     context: context,
-                //     barrierDismissible: false,
-                //     builder: (context) {
-                //       return Dialog(
-                //         backgroundColor: Colors.transparent,
-                //         child: Center(
-                //           child: CircularProgressIndicator(
-                //             color: Color(0xFF3F2771),
-                //           ),
-                //         ),
-                //       );
-                //     },
-                //   );
-                //
-                //   try {
-                //     // Simulate loading
-                //     await Future.delayed(Duration(seconds: 2));
-                //
-                //     // Close the loading dialog
-                //     if (context.mounted) {
-                //       Navigator.of(context).pop();
-                //     }
-                //
-                //     // Show CustomDialogWidget
-                //     if (context.mounted) {
-                //       showDialog(
-                //         context: context,
-                //         barrierDismissible: false,
-                //         builder: (context) => CustomDialogWidget(),
-                //       );
-                //     }
-                //   } catch (e) {
-                //     // Handle any errors here, if needed
-                //     print("Error occurred: $e");
-                //   }
-                // },
+
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF3F2771),
                   minimumSize: const Size.fromHeight(50),
@@ -324,7 +292,8 @@ class _SigninState extends State<Signin> {
                 ),
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text("Login", style: TextStyle(fontSize: 16, color: Colors.white)),
+                    : const Text("Login",
+                        style: TextStyle(fontSize: 16, color: Colors.white)),
               ),
               const SizedBox(height: 20),
               Center(
@@ -365,7 +334,6 @@ class _SigninState extends State<Signin> {
   }
 }
 
-
 class CustomDialogWidget extends StatelessWidget {
   const CustomDialogWidget({super.key});
 
@@ -375,7 +343,8 @@ class CustomDialogWidget extends StatelessWidget {
       if (context.mounted) {
         Navigator.of(context).pop(); // Close the dialog
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => hompage()), // Pass required parameter
+          MaterialPageRoute(
+              builder: (context) => hompage()), // Pass required parameter
         );
       }
     });
