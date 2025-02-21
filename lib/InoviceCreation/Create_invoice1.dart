@@ -93,7 +93,7 @@ class _CreateInvoice1State extends State<CreateInvoice1> {
               _buildLabel("Add Product"),
               _buildProductField(),
 
-              const SizedBox(height: 150),
+              const SizedBox(height: 110),
 
               // Next Button
               SizedBox(
@@ -182,7 +182,16 @@ class _CreateInvoice1State extends State<CreateInvoice1> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           const Text("Add your first product", style: TextStyle(color: Colors.grey)),
-          const Icon(Icons.add_circle, color: Color(0xFF3F2771)),
+          IconButton(
+            icon: const Icon(Icons.add_circle, color: Color(0xFF3F2771)),
+            onPressed: () {
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => CustomDialogWidget(),
+              );
+            },
+          ),
         ],
       ),
     );
@@ -203,6 +212,145 @@ class _CreateInvoice1State extends State<CreateInvoice1> {
           style: TextStyle(
             color: isCurrentStep ? Colors.white : Colors.black,
             fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class CustomDialogWidget extends StatefulWidget {
+  const CustomDialogWidget({super.key});
+
+  @override
+  State<CustomDialogWidget> createState() => _CustomDialogWidgetState();
+}
+
+class _CustomDialogWidgetState extends State<CustomDialogWidget> {
+  final TextEditingController productNameController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
+  final TextEditingController quantityController = TextEditingController(text: '0');
+  final TextEditingController amountController = TextEditingController(text: '0.00');
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header with Close Button
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "Add Products",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () {
+                      Navigator.pop(context); // Close the dialog
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+
+              // Product Name Field
+              const Text("Product Name"),
+              const SizedBox(height: 5),
+              TextField(
+                controller: productNameController,
+                decoration: InputDecoration(
+                  hintText: "Enter product name",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Colors.grey),
+                  ),
+                  enabledBorder: Bcolor.enabledBorder,
+                ),
+              ),
+              const SizedBox(height: 15),
+
+              // Description Field
+              const Text("Description"),
+              const SizedBox(height: 5),
+              TextField(
+                controller: descriptionController,
+                decoration: InputDecoration(
+                  hintText: "Enter product name",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Colors.grey),
+                  ),
+                  enabledBorder: Bcolor.enabledBorder,
+                ),
+              ),
+              const SizedBox(height: 15),
+
+              // Quantity Field
+              const Text("Quantity"),
+              const SizedBox(height: 5),
+              TextField(
+                controller: quantityController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Colors.grey),
+                  ),
+                  enabledBorder: Bcolor.enabledBorder,
+                ),
+              ),
+              const SizedBox(height: 15),
+
+              // Amount Per Quantity Field
+              const Text("Amount Per Quantity"),
+              const SizedBox(height: 5),
+              TextField(
+                controller: amountController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Colors.grey),
+                  ),
+                  enabledBorder: Bcolor.enabledBorder,
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Add Button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    // Handle add product action here
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF3F2771), // Purple color
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                  ),
+                  child: const Text(
+                    "Add",
+                    style: TextStyle(fontSize: 18, color: Colors.white),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
