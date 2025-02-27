@@ -1,21 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:green_wallet/Card/hompage.dart';
 
-class Topupd extends StatefulWidget {
-  final double fundAmount;
-  final double fundingFee;
-  final String destination;
-  const Topupd({super.key,
-    required this.fundAmount,
-    required this.fundingFee,
-    required this.destination,});
+import '../Card/hompage.dart';
+
+class ReviewNgn extends StatefulWidget {
+  const ReviewNgn({super.key});
 
   @override
-  State<Topupd> createState() => _TopupdState();
+  State<ReviewNgn> createState() => _ReviewNgnState();
 }
 
-class _TopupdState extends State<Topupd> {
-  double get totalAmount => widget.fundAmount + widget.fundingFee;
+class _ReviewNgnState extends State<ReviewNgn> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,61 +18,69 @@ class _TopupdState extends State<Topupd> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
-        centerTitle: true,
-        title: const Text(
+        title: Text(
           "Review Details",
           style: TextStyle(
             color: Colors.black,
-            fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
         ),
+        centerTitle: true,
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Transaction Summary
+            SizedBox(height: 20),
             Text(
-              "You are about to top up ₦${widget.fundAmount.toStringAsFixed(2)} to ${widget.destination}",
-              style: const TextStyle(fontSize: 16),
+              "You are about to Send \₦100.00 to Abdul Gafar",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
-            const SizedBox(height: 20),
-
-// Fund Amount Row
-            _buildSummaryRow("Fund amount", "₦${widget.fundAmount.toStringAsFixed(2)}"),
-            const SizedBox(height: 5),
-
-// Funding Fee Row
-            _buildSummaryRow("Funding fee", "₦${widget.fundingFee.toStringAsFixed(2)}"),
-            const SizedBox(height: 5),
-
-            // Total Amount Row
-            _buildSummaryRow("Total amount", "₦${totalAmount.toStringAsFixed(2)}"),
-            const SizedBox(height: 20),
-
-            // Total Amount to Send (Highlighted)
+            SizedBox(height: 20),
             Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+              padding: EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: const Color(0xFFEDE7F6), // Light purple background
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.grey[100],
+              ),
+              child: Column(
+                children: [
+                  _buildAmountRow("Fund amount", "\₦100.00"),
+                  _buildAmountRow("Transfer fee", "\₦10.00"),
+                  _buildAmountRow("Total amount", "\₦110.00"),
+                ],
+              ),
+            ),
+            SizedBox(height: 10),
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.purple[50],
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Text(
-                "Total Amount to send    ₦${totalAmount.toStringAsFixed(2)}",
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Total Amount to send",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  ),
+                  Text(
+                    "\₦110.00",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ],
               ),
             ),
-            const Spacer(),
-
-            // Confirm Button
-      SizedBox(
-        width: double.infinity,
-        child: ElevatedButton(
+            Spacer(),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
                 onPressed: () async {
                   showDialog(
                     context: context,
@@ -102,36 +104,38 @@ class _TopupdState extends State<Topupd> {
                     context: context,
                     barrierDismissible: false,
                     builder: (context) => CustomDialogWidget(),
-                  );
+                  );// Add confirmation logic
                 },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF3F2771),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF3F2771),
+                  padding: EdgeInsets.symmetric(vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
                 ),
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-                child: const Text(
+                child: Text(
                   "Confirm",
                   style: TextStyle(fontSize: 18, color: Colors.white),
                 ),
               ),
-      ),
-            const SizedBox(height: 20),
+            ),
+            SizedBox(height: 20),
           ],
         ),
       ),
     );
   }
 
-  // Helper method to build summary rows
-  Widget _buildSummaryRow(String label, String value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label, style: const TextStyle(fontSize: 16)),
-        Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-      ],
+  Widget _buildAmountRow(String label, String amount) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: TextStyle(fontSize: 14, color: Colors.grey[700])),
+          Text(amount, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+        ],
+      ),
     );
   }
 }
@@ -180,7 +184,7 @@ class CustomDialogWidget extends StatelessWidget {
             SizedBox(height: 0),
             // Title
             Text(
-              "Top Up Successful",
+              "Transfer Successful",
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,

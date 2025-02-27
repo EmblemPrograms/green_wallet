@@ -69,7 +69,7 @@ class _AccountDetailsState extends State<AccountDetails> {
         backgroundColor: const Color(0xFF3F2771),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
           onPressed: () {
             Navigator.push(
               context,

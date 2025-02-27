@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:green_wallet/ActionB/ReasonNgn.dart';
 
 class Sendbngn extends StatefulWidget {
   const Sendbngn({super.key});
@@ -18,7 +19,7 @@ class _SendbngnState extends State<Sendbngn> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
@@ -107,7 +108,10 @@ class _SendbngnState extends State<Sendbngn> {
               child: ElevatedButton(
                 onPressed: amountController.text.isNotEmpty
                     ? () {
-                  // Handle Next Button Action
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => Reasonngn()),
+                  );// Handle Next Button Action
                 }
                     : null, // Disable if input is empty
                 style: ElevatedButton.styleFrom(

@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:green_wallet/ActionB/ReviewNgn.dart';
 
-class Reasonngn extends StatefulWidget {
-  const Reasonngn({super.key});
+import 'ReviewInt.dart';
+
+class ReasonInt extends StatefulWidget {
+  const ReasonInt({super.key});
 
   @override
-  State<Reasonngn> createState() => _ReasonngnState();
+  State<ReasonInt> createState() => _ReasonIntState();
 }
 
-class _ReasonngnState extends State<Reasonngn> {
+class _ReasonIntState extends State<ReasonInt> {
   final TextEditingController _noteController = TextEditingController();
 
   @override
@@ -64,7 +65,7 @@ class _ReasonngnState extends State<Reasonngn> {
                     ? () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => ReviewNgn()),
+                    MaterialPageRoute(builder: (context) => ReviewInt()),
                   );// Handle Next Button Action
                 }
                     : null, // Disable if input is empty

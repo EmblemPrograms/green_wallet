@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:green_wallet/ActionB/SendBngn.dart';
 
 class ngnSend extends StatefulWidget {
   const ngnSend({super.key});
@@ -22,7 +23,7 @@ class _ngnSendState extends State<ngnSend> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
@@ -72,9 +73,12 @@ class _ngnSendState extends State<ngnSend> {
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 hintText: "1234567890",
+                counterText: "",
                 contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
               ),
+              maxLength: 10,
+
               onChanged: (value) {
                 setState(() {}); // Update UI
               },
@@ -107,7 +111,10 @@ class _ngnSendState extends State<ngnSend> {
               child: ElevatedButton(
                 onPressed: (selectedBank != null && accountNumberController.text.isNotEmpty)
                     ? () {
-                  // Handle Next Button Action
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => Sendbngn()),
+                  );// Handle Next Button Action
                 }
                     : null, // Disable if fields are empty
                 style: ElevatedButton.styleFrom(

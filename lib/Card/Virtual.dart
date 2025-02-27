@@ -16,7 +16,7 @@ class _VirtualState extends State<Virtual> {
         elevation: 0,
         backgroundColor: Colors.white,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black),
           color: Colors.black,
           onPressed: () {
             Navigator.pop(context); // Go back to the previous screen
