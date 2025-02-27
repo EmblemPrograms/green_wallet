@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:green_wallet/ActionB/Convert.dart';
+import 'package:green_wallet/ActionB/Send.dart';
+import 'package:green_wallet/ActionB/TopUp.dart';
 import 'package:green_wallet/Card/Invoice.dart';
 import 'package:green_wallet/Card/VCard.dart';
 import 'package:green_wallet/Card/Profile.dart';
@@ -81,13 +83,13 @@ class _homepageState extends State<homepage> {
     super.initState();
     _loadFullName();
   }
+
   Future<void> _loadFullName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _fullName = prefs.getString("full_name") ?? "User";
+      _fullName = prefs.getString("full_name") ?? "User Name";
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -306,15 +308,14 @@ class _homepageState extends State<homepage> {
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) =>
-                                              const Virtual()),
+                                              const Transfer()),
                                     );
                                   }),
                                   _buildActionButton(Icons.add, "Top-up", () {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) =>
-                                              const Virtual()),
+                                          builder: (context) => const Topup()),
                                     );
                                   }),
                                   _buildActionButton(Icons.more_horiz, "More",
