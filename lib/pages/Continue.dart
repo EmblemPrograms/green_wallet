@@ -60,19 +60,19 @@ class _ContinueState extends State<Continue> {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
               ),
-              padding: EdgeInsets.all(16),
+              padding: EdgeInsets.only(right: 6, top: 16),
               child: Column(
                 children: [
 
                   const SizedBox(height: 35),
                   _buildVerificationStep(
                     icon: Icons.image,
-                    text: "Take a selfie",
+                    text: "Upload  photos of document proving your identity",
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 180),
+            Spacer(),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFF442266), // Dark purple color
@@ -105,7 +105,7 @@ class _ContinueState extends State<Continue> {
   Widget _buildVerificationStep({required IconData icon, required String text}) {
     return Padding(
       padding: const EdgeInsets.only(
-        left: 50
+        left: 10
       ),
       child: Row(
         children: [

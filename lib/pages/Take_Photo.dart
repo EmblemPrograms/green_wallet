@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:green_wallet/pages/SelectId.dart';
 import 'package:green_wallet/pages/Setup_pin.dart';
+import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:file_picker/file_picker.dart';
 
 class TakePhoto extends StatefulWidget {
   const TakePhoto({super.key});
@@ -10,6 +14,26 @@ class TakePhoto extends StatefulWidget {
 }
 
 class _TakePhotoState extends State<TakePhoto> {
+
+  File? _selectedFile;
+  String? fileName; // Variable to hold the file name
+  Future<void> pickFile() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+      if (result != null) {
+        setState(() {
+          _selectedFile = File(result.files.single.path!);
+          fileName = result.files.single.name;
+        });
+      } else {
+        print("❌ No file selected.");
+      }
+    } catch (e) {
+      print("❌ File selection error: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,12 +82,27 @@ class _TakePhotoState extends State<TakePhoto> {
               fit: BoxFit.contain, // Ensures the image fits within the size constraints
             ),
             Spacer(),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 15, vertical: 14),
+              decoration: BoxDecoration(
+                border: Border.all(color: Color(0xFFE0E0E0)),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(fileName ?? "File Name"),
+                ],
+              ),
+            ),
+            Spacer(),
             Column(
               children: [
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
-                    onPressed: () {
+                    onPressed  : () {
                         Navigator.push(
                             context, MaterialPageRoute(builder: (context) => SetupPin()));
                       // Handle "Take a Photo" button action
@@ -88,7 +127,7 @@ class _TakePhotoState extends State<TakePhoto> {
                   width: double.infinity,
                   child: OutlinedButton.icon(
                     onPressed: () {
-                      // Handle "Attach File" button action
+                      pickFile; // Handle "Attach File" button action
                     },
                     icon: Icon(Icons.attach_file, color: Color(0xFF442266)),
                     label: Text(

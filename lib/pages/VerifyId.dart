@@ -35,15 +35,16 @@ class _VerifyidState extends State<Verifyid> {
               style: TextStyle(
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
-                fontSize: 14,
+                fontSize: 20,
               ),
+              textAlign: TextAlign.justify,
             ),
             SizedBox(height: 10),
             Text(
               "1. Purpose of Collection:",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 13,
+                fontSize: 14,
                 color: Colors.black,
               ),
             ),
@@ -52,7 +53,7 @@ class _VerifyidState extends State<Verifyid> {
               "VidCapture may use facial scans solely for identity verification, personalized experiences, or improving our platform’s functionality. We do not sell or share your biometric data with third parties without your consent.",
               style: TextStyle(
                 color: Colors.black,
-                fontSize: 13,
+                fontSize: 14,
                 height: 1.4,
               ),
               textAlign: TextAlign.justify,
@@ -62,7 +63,7 @@ class _VerifyidState extends State<Verifyid> {
               "2. Consent",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 13,
+                fontSize: 14,
                 color: Colors.black,
               ),
             ),
@@ -71,7 +72,7 @@ class _VerifyidState extends State<Verifyid> {
               "By using our platform, you consent to the collection and use of facial scans and other data as outlined in this policy. You have the right to withdraw consent by contacting our support team at any time.",
               style: TextStyle(
                 color: Colors.black,
-                fontSize: 13,
+                fontSize: 14,
                 height: 1.4,
               ),
               textAlign: TextAlign.justify,
@@ -81,7 +82,7 @@ class _VerifyidState extends State<Verifyid> {
               "3. Data",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 13,
+                fontSize: 14,
                 color: Colors.black,
               ),
             ),
@@ -90,7 +91,7 @@ class _VerifyidState extends State<Verifyid> {
               "All biometric data, including facial scans, is securely encrypted and stored on compliant servers. We implement industry-standard security measures to protect your data.",
               style: TextStyle(
                 color: Colors.black,
-                fontSize: 13,
+                fontSize: 14,
                 height: 1.4,
               ),
               textAlign: TextAlign.justify,
@@ -100,7 +101,7 @@ class _VerifyidState extends State<Verifyid> {
               "4. Data Retention",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 13,
+                fontSize: 14,
                 color: Colors.black,
               ),
             ),
@@ -109,7 +110,7 @@ class _VerifyidState extends State<Verifyid> {
               "Facial scan data will only be retained for as long as necessary to fulfill its intended purpose or as required by law. Upon termination of your account, your data will be permanently deleted within 30 days.",
               style: TextStyle(
                 color: Colors.black,
-                fontSize: 13,
+                fontSize: 14,
                 height: 1.4,
               ),
               textAlign: TextAlign.justify,

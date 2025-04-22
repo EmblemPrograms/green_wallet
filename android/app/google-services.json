@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "718989078681",
+    "project_id": "greenwallet-dc01b",
+    "storage_bucket": "greenwallet-dc01b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:718989078681:android:22d7d308f2d49f0b37c808",
+        "android_client_info": {
+          "package_name": "com.example.green_wallet"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB8P5TIpKzTwMXvcIQPkJw7mVJhexXkOYw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
