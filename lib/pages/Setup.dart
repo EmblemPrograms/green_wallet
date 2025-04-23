@@ -39,11 +39,18 @@ class _SetupState extends State<Setup> {
           _selectedFile = File(result.files.single.path!);
           fileName = result.files.single.name;
         });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("📄 File selected: $fileName")),
+        );
       } else {
-        print("❌ No file selected.");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("❌ No file selected. ")),
+        );
       }
     } catch (e) {
-      print("❌ File selection error: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("❌ File selection error ")),
+      );
     }
   }
 

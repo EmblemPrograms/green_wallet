@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
+import 'package:image_picker/image_picker.dart';
 
 class TakePhoto extends StatefulWidget {
   const TakePhoto({super.key});
@@ -14,7 +15,6 @@ class TakePhoto extends StatefulWidget {
 }
 
 class _TakePhotoState extends State<TakePhoto> {
-
   File? _selectedFile;
   String? fileName; // Variable to hold the file name
   Future<void> pickFile() async {
@@ -26,11 +26,18 @@ class _TakePhotoState extends State<TakePhoto> {
           _selectedFile = File(result.files.single.path!);
           fileName = result.files.single.name;
         });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("📄 File selected: $fileName")),
+        );
       } else {
-        print("❌ No file selected.");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("❌ No file selected. ")),
+        );
       }
     } catch (e) {
-      print("❌ File selection error: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("❌ File selection error ")),
+      );
     }
   }
 
@@ -45,7 +52,7 @@ class _TakePhotoState extends State<TakePhoto> {
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black),
           onPressed: () {
             Navigator.push(
-                  context, MaterialPageRoute(builder: (context) => Selectid()));
+                context, MaterialPageRoute(builder: (context) => Selectid()));
           },
         ),
         centerTitle: true,
@@ -75,24 +82,37 @@ class _TakePhotoState extends State<TakePhoto> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Spacer(),
-            Image.asset(
-              'assets/image17.png', // Replace with the correct path to your image
-              width: 200,
-              height: 200,
-              fit: BoxFit.contain, // Ensures the image fits within the size constraints
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: _selectedFile != null
+                  ? Image.file(
+                _selectedFile!,
+                width: 250,
+                height: 250,
+                fit: BoxFit.cover,
+              )
+                  : Image.asset(
+                'assets/image17.png',
+                width: 200,
+                height: 200,
+                fit: BoxFit.contain,
+              ),
             ),
+
             Spacer(),
             Container(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 15, vertical: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 14),
               decoration: BoxDecoration(
                 border: Border.all(color: Color(0xFFE0E0E0)),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Text(fileName ?? "File Name"),
+                  Text(fileName ?? "File Name",
+                    style: TextStyle(
+                      fontSize: 10,
+                    ),),
                 ],
               ),
             ),
@@ -102,17 +122,36 @@ class _TakePhotoState extends State<TakePhoto> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
-                    onPressed  : () {
-                        Navigator.push(
-                            context, MaterialPageRoute(builder: (context) => SetupPin()));
+                    onPressed: () async {
+                      final picker = ImagePicker();
+                      final XFile? image =
+                          await picker.pickImage(source: ImageSource.camera);
+
+                      if (image != null) {
+                        setState(() {
+                          _selectedFile = File(image.path);
+                          fileName = image.name;
+                        });
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content:
+                                  Text("📷 Selfie captured: ${image.name}")),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("❌ No image captured.")),
+                        );
+                      }
                       // Handle "Take a Photo" button action
                     },
                     icon: Icon(Icons.camera_alt_outlined, color: Colors.white),
-                    label: Text("Take a Photo",
+                    label: Text(
+                      "Take a Photo",
                       style: TextStyle(
-                      color: Colors.white,
+                        color: Colors.white,
+                      ),
                     ),
-                  ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF442266),
                       padding: EdgeInsets.symmetric(vertical: 16.0),
@@ -127,7 +166,7 @@ class _TakePhotoState extends State<TakePhoto> {
                   width: double.infinity,
                   child: OutlinedButton.icon(
                     onPressed: () {
-                      pickFile; // Handle "Attach File" button action
+                      pickFile(); // Handle "Attach File" button action
                     },
                     icon: Icon(Icons.attach_file, color: Color(0xFF442266)),
                     label: Text(
@@ -145,6 +184,15 @@ class _TakePhotoState extends State<TakePhoto> {
                     ),
                   ),
                 ),
+                SizedBox(height: 12),
+                TextButton(onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => SetupPin()),
+                  );
+                },
+                    child: Text("Next",)
+                )
               ],
             ),
             SizedBox(height: 40),
