@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:green_wallet/pages/SelectId.dart';
 import 'package:green_wallet/pages/Setup_pin.dart';
 import 'dart:io';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
 

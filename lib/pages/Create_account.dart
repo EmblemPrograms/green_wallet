@@ -53,7 +53,6 @@ class _CreateAccountState extends State<CreateAccount> {
       });
 
       if (response.statusCode == 200) {
-        print("✅ Registration Successful: ${data['message']}");
 
         // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
@@ -67,12 +66,10 @@ class _CreateAccountState extends State<CreateAccount> {
           ),
         );
       } else {
-        print("❌ Registration Failed: ${data['message']}");
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(data['message'] ?? "Registration failed")));
       }
     } catch (error) {
-      print("❌ Error: $error");
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text("Network Error. Try Again")));
     }

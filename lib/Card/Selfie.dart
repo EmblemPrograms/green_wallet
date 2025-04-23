@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
-
 import 'package:image_picker/image_picker.dart';
-
 import 'Create_card.dart';
 
 class Selfie extends StatefulWidget {
@@ -13,19 +11,32 @@ class Selfie extends StatefulWidget {
 }
 
 class _SelfieState extends State<Selfie> {
-  File? _selfieImage; // To store the captured selfie
-  final ImagePicker _picker = ImagePicker();
+  File? _selfieImage;
+  String? fileName;// To store the captured selfie
+  final picker = ImagePicker();
 
   // Method to open the camera and take a selfie
-  Future<void> _takeSelfie() async {
+  Future<void> takeSelfie() async {
     try {
-      final XFile? pickedFile =
-      await _picker.pickImage(source: ImageSource.camera);
+      final picker = ImagePicker();
+      final XFile? image =
+      await picker.pickImage(source: ImageSource.camera);
 
-      if (pickedFile != null) {
+      if (image != null) {
         setState(() {
-          _selfieImage = File(pickedFile.path); // Store the captured image
+          _selfieImage = File(image.path);
+          fileName = image.name;
         });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content:
+              Text("📷 Selfie captured: ${image.name}")),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("❌ No image captured.")),
+        );
       }
     } catch (e) {
       // Handle any errors (like permissions denied)
@@ -131,10 +142,7 @@ class _SelfieState extends State<Selfie> {
             // Continue Button
             ElevatedButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => CreateCard()),
-                );
+                takeSelfie();
               },
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
@@ -152,7 +160,16 @@ class _SelfieState extends State<Selfie> {
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 5),
+            TextButton(onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => CreateCard()),
+              );
+            },
+                child: Text("Next",)
+            ),
+            const SizedBox(height: 10),
           ],
         ),
       ),
