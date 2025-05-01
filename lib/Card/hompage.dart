@@ -3,6 +3,7 @@ import 'package:green_wallet/ActionB/Convert.dart';
 import 'package:green_wallet/ActionB/MoreP.dart';
 import 'package:green_wallet/ActionB/Send.dart';
 import 'package:green_wallet/ActionB/TopUp.dart';
+import 'package:green_wallet/Card/Account_details.dart';
 import 'package:green_wallet/Card/Invoice.dart';
 import 'package:green_wallet/Card/VCard.dart';
 import 'package:green_wallet/Card/Profile.dart';
@@ -107,32 +108,43 @@ class _homepageState extends State<homepage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   // User Info Section
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        backgroundColor: Colors.white.withOpacity(0.2),
-                        radius: 20,
-                      ),
-                      const SizedBox(width: 10),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Good Morning",
-                            style: TextStyle(color: Colors.white, fontSize: 12),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            _fullName,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AccountDetails(),
+                        ),
+                      );
+                    },
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: Colors.white.withOpacity(0.2),
+                          radius: 20,
+                          child: Icon(Icons.person, color: Colors.white), // Optional icon
+                        ),
+                        const SizedBox(width: 10),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Good Morning",
+                              style: TextStyle(color: Colors.white, fontSize: 12),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                            const SizedBox(height: 4),
+                            Text(
+                              _fullName,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                   // Notification Icon
                   CircleAvatar(
@@ -149,13 +161,13 @@ class _homepageState extends State<homepage> {
               children: [
                 // Purple Background
                 Container(
-                  height: 580, // Adjust the height as needed
+                  height: 578, // Adjust the height as needed
                   color: const Color(0xFF3F2771), // Purple background
                 ),
 
                 // White Card Section
                 Positioned(
-                  top: 160,
+                  top: 158,
                   left: 0,
                   right: 0,
                   child: Container(
@@ -290,7 +302,7 @@ class _homepageState extends State<homepage> {
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 20),
+                              const SizedBox(height: 18),
                               Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,

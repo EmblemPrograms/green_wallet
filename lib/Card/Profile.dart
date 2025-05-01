@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:green_wallet/profile/Account_info.dart';
+import 'package:green_wallet/profile/cardbf.dart';
+import 'package:green_wallet/profile/help.dart';
+import 'package:green_wallet/profile/noti.dart';
+import 'package:green_wallet/profile/security.dart';
 import 'package:green_wallet/widgets/Navigation_bar.dart';
 import 'package:green_wallet/Card/Invoice.dart';
 import 'package:green_wallet/Card/VCard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'hompage.dart';
-
 
 class ProfileP extends StatefulWidget {
   const ProfileP({super.key});
@@ -30,7 +34,6 @@ class _ProfilePState extends State<ProfileP> {
       _selectedIndex = index;
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +66,8 @@ class _ProfileState extends State<Profile> {
   Future<void> _loadUserName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _fullName = prefs.getString("full_name") ?? "User"; // ✅ Load name dynamically
+      _fullName =
+          prefs.getString("full_name") ?? "User"; // ✅ Load name dynamically
     });
   }
 
@@ -82,16 +86,69 @@ class _ProfileState extends State<Profile> {
                   children: [
                     const SizedBox(height: 16),
                     _buildSectionTitle("ACCOUNT"),
-                    _buildMenuItem(Icons.person, "Account Information"),
-                    _buildMenuItem(Icons.verified, "Account Verification", trailing: _buildVerifiedBadge()),
-                    _buildMenuItem(Icons.notifications, "Notifications"),
+                    _buildMenuItem(
+                      Icons.person,
+                      "Account Information",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const AccountInfoScreen()),
+                        );
+                      },
+                    ),
+                    _buildMenuItem(Icons.verified, "Account Verification",
+                        trailing: _buildVerifiedBadge()),
+                    _buildMenuItem(
+                      Icons.notifications,
+                      "Notifications",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  const NotificationsScreen()),
+                        );
+                      },
+                    ),
                     const SizedBox(height: 16),
                     _buildSectionTitle("ACCOUNT"),
-                    _buildMenuItem(Icons.credit_card, "Cards & Beneficiaries"),
+                    _buildMenuItem(
+                      Icons.credit_card,
+                      "Cards & Beneficiaries",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  const CardsBeneficiariesPage()),
+                        );
+                      },
+                    ),
                     const SizedBox(height: 16),
                     _buildSectionTitle("SECURITY"),
-                    _buildMenuItem(Icons.security, "Security Settings"),
-                    _buildMenuItem(Icons.support, "Help & Support"),
+                    _buildMenuItem(
+                      Icons.security,
+                      "Security Settings",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  const SecuritySettingsScreen()),
+                        );
+                      },
+                    ),
+                    _buildMenuItem(
+                      Icons.support,
+                      "Help & Support",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const Help()),
+                        );
+                      },
+                    ),
                     _buildMenuItem(Icons.info, "Terms & Conditions"),
                     _buildMenuItem(Icons.privacy_tip, "Privacy Policy"),
                     const SizedBox(height: 20),
@@ -120,7 +177,8 @@ class _ProfileState extends State<Profile> {
                         },
                         child: const Text(
                           "Log Out",
-                          style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              color: Colors.red, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
@@ -134,23 +192,25 @@ class _ProfileState extends State<Profile> {
       ),
     );
   }
+
   Widget _buildHeader() {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.only(top: 50, bottom: 20),
       decoration: const BoxDecoration(
         color: Color(0xFF3F2771),
-
       ),
       child: Column(
         children: [
-          const CircleAvatar( backgroundImage: AssetImage("assets/photo.png"),
+          const CircleAvatar(
+            backgroundImage: AssetImage("assets/photo.png"),
             radius: 30,
           ),
           const SizedBox(height: 8),
           Text(
             _fullName,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+            style: TextStyle(
+                fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           const Text(
             "GreenWallet Account",
@@ -166,36 +226,43 @@ class _ProfileState extends State<Profile> {
       padding: const EdgeInsets.only(bottom: 4),
       child: Text(
         title,
-        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black),
+        style: const TextStyle(
+            fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black),
       ),
     );
   }
 
-  Widget _buildMenuItem(IconData icon, String title, {Widget? trailing}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.purple.shade50,
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 18,
-            backgroundColor: Colors.white,
-            child: Icon(icon, color: const Color(0xFF3F2771)),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              title,
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+  Widget _buildMenuItem(IconData icon, String title,
+      {Widget? trailing, VoidCallback? onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(15),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        decoration: BoxDecoration(
+          color: Colors.purple.shade50,
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 18,
+              backgroundColor: Colors.white,
+              child: Icon(icon, color: const Color(0xFF3F2771)),
             ),
-          ),
-          if (trailing != null) trailing,
-          const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
-        ],
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title,
+                style:
+                    const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+              ),
+            ),
+            if (trailing != null) trailing,
+            const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+          ],
+        ),
       ),
     );
   }

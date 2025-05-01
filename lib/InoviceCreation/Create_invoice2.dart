@@ -84,7 +84,9 @@ class _CreateInvoice2State extends State<CreateInvoice2> {
                       borderRadius: BorderRadius.circular(25),
                     ),
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+
+                  },
                   child: const Text("Preview", style: TextStyle(fontSize: 16, color: Colors.white)),
                 ),
               ),

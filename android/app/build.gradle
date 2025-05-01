@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.example.green_wallet"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 35
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -25,8 +25,8 @@ android {
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdkVersion flutter.minSdkVersion // This ensures it's set from gradle.properties
-        targetSdkVersion 34 // You can update this to the latest SDK version
-        compileSdkVersion 34
+        targetSdkVersion 35 // You can update this to the latest SDK version
+        compileSdkVersion 35
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
