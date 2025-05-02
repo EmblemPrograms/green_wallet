@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:green_wallet/widgets/textborder.dart';
 import 'chatus.dart';
 
 class YourAddressPage extends StatefulWidget {
@@ -103,10 +103,7 @@ class _YourAddressPageState extends State<YourAddressPage> {
         fillColor: Colors.white,
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-        enabledBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.grey),
-          borderRadius: BorderRadius.circular(10),
-        ),
+        enabledBorder: Bcolor.enabledBorder,
       ),
     );
   }

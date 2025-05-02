@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:green_wallet/profile/address.dart';
+import 'package:green_wallet/profile/kin.dart';
 import 'package:green_wallet/profile/your_info.dart';
 
 class AccountInfoScreen extends StatefulWidget {
@@ -63,7 +64,12 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
               title: "Next of Kin",
               subtitle: "Confirm details of next of kin",
               onTap: () {
-                // Handle tap
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                      Kin()),
+                );// Handle tap
               },
             ),
           ],

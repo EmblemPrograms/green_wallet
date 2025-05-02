@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:green_wallet/InoviceCreation/preview.dart';
 import 'package:green_wallet/widgets/textborder.dart';
 
 class CreateInvoice2 extends StatefulWidget {
@@ -85,7 +86,12 @@ class _CreateInvoice2State extends State<CreateInvoice2> {
                     ),
                   ),
                   onPressed: () {
-
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                          const InvoicePreview()),
+                    );
                   },
                   child: const Text("Preview", style: TextStyle(fontSize: 16, color: Colors.white)),
                 ),

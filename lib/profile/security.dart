@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:green_wallet/profile/Pre_pin.dart';
+import 'package:green_wallet/profile/loginpass.dart';
 
 class SecuritySettingsScreen extends StatefulWidget {
   const SecuritySettingsScreen({super.key});
@@ -51,7 +52,12 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen> {
               title: "Login Password",
               subtitle: "Change your login password",
               onTap: () {
-                // Navigate to password change screen
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                      const ChangePass()),
+                );// Navigate to password change screen
               },
             ),
             _buildBiometricToggle(),
