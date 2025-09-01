@@ -181,7 +181,7 @@ class _SelfieState extends State<Selfie> {
 class InstructionItem extends StatelessWidget {
   final String text;
 
-  const InstructionItem({Key? key, required this.text}) : super(key: key);
+  const InstructionItem({super.key, required this.text});
 
   @override
   Widget build(BuildContext context) {

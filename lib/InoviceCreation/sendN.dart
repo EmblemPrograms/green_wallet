@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'customerd.dart';
 
 class InvoiceList extends StatefulWidget {
+  const InvoiceList({super.key});
+
   @override
   _InvoiceListState createState() => _InvoiceListState();
 }

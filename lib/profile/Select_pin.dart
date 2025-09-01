@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:green_wallet/pages/Setup_pin.dart';
 import 'package:green_wallet/Card/hompage.dart';
 import 'package:green_wallet/profile/security.dart';
 import 'package:http/http.dart' as http;

@@ -55,7 +55,7 @@ class _ReviewDState extends State<ReviewD> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _currencyInfo("🇳🇬", "\₦${widget.ngnAmount}"), // Updated
+                    _currencyInfo("🇳🇬", "₦${widget.ngnAmount}"), // Updated
                     const Icon(Icons.swap_horiz, color: Colors.white, size: 24),
                     _currencyInfo("🇺🇸", "\$${widget.usdAmount}"), // Updated
                   ],
@@ -73,7 +73,7 @@ class _ReviewDState extends State<ReviewD> {
                 ),
                 child: Column(
                   children: [
-                    _transactionRow("From", "\₦${widget.ngnAmount} (Naira)"), // Updated
+                    _transactionRow("From", "₦${widget.ngnAmount} (Naira)"), // Updated
                     _divider(),
                     _transactionRow("To", "\$${widget.usdAmount} (US Dollar)"), // Updated
                     _divider(),
@@ -100,7 +100,7 @@ class _ReviewDState extends State<ReviewD> {
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                     ),
                     Text(
-                      "\₦${widget.ngnAmount}",
+                      "₦${widget.ngnAmount}",
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,

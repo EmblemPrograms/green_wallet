@@ -3,7 +3,7 @@ import 'package:green_wallet/widgets/textborder.dart';
 import 'chatus.dart';
 
 class YourAddressPage extends StatefulWidget {
-  const YourAddressPage({Key? key}) : super(key: key);
+  const YourAddressPage({super.key});
 
   @override
   State<YourAddressPage> createState() => _YourAddressPageState();

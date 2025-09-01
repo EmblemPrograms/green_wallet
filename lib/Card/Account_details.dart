@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:green_wallet/Card/hompage.dart';
 
 class AccountDetails extends StatefulWidget {
   const AccountDetails({super.key});

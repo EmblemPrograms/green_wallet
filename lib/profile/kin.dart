@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:green_wallet/widgets/textborder.dart';
 
 class Kin extends StatefulWidget {
+  const Kin({super.key});
+
   @override
   _KinState createState() => _KinState();
 }

@@ -38,7 +38,7 @@ class _ReviewNgnState extends State<ReviewNgn> {
           children: [
             SizedBox(height: 20),
             Text(
-              "You are about to Send \₦100.00 to Abdul Gafar",
+              "You are about to Send ₦100.00 to Abdul Gafar",
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
             SizedBox(height: 20),
@@ -50,9 +50,9 @@ class _ReviewNgnState extends State<ReviewNgn> {
               ),
               child: Column(
                 children: [
-                  _buildAmountRow("Fund amount", "\₦100.00"),
-                  _buildAmountRow("Transfer fee", "\₦10.00"),
-                  _buildAmountRow("Total amount", "\₦110.00"),
+                  _buildAmountRow("Fund amount", "₦100.00"),
+                  _buildAmountRow("Transfer fee", "₦10.00"),
+                  _buildAmountRow("Total amount", "₦110.00"),
                 ],
               ),
             ),
@@ -71,7 +71,7 @@ class _ReviewNgnState extends State<ReviewNgn> {
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                   ),
                   Text(
-                    "\₦110.00",
+                    "₦110.00",
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ],

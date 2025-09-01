@@ -99,7 +99,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             activeTrackColor: const Color(0xFF3F2771),
             inactiveTrackColor: Colors.grey.shade200,
             inactiveThumbColor: Colors.white,
-            trackOutlineColor: MaterialStateProperty.all(Colors.grey.shade200),
+            trackOutlineColor: WidgetStateProperty.all(Colors.grey.shade200),
           ),
         ],
       ),

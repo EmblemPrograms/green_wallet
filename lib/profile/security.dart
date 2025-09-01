@@ -150,7 +150,7 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen> {
             activeTrackColor: const Color(0xFF3F2771),
             inactiveTrackColor: Colors.grey.shade200,
             inactiveThumbColor: Colors.white,
-            trackOutlineColor: MaterialStateProperty.all(Colors.grey.shade200),
+            trackOutlineColor: WidgetStateProperty.all(Colors.grey.shade200),
           ),
         ],
       ),

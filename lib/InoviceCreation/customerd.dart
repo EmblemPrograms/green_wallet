@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:green_wallet/Card/Invoice.dart';
 
 class CustomerDetails extends StatefulWidget {
+  const CustomerDetails({super.key});
+
   @override
   _CustomerDetailsState createState() => _CustomerDetailsState();
 }
@@ -79,7 +81,6 @@ class _CustomerDetailsState extends State<CustomerDetails> {
           MaterialPageRoute(builder: (context) => InvoiceP()),
         ); // Handle continue action
       },
-      child: Text('Continue'),
       style: ElevatedButton.styleFrom(
         backgroundColor: Color(0xFF402978),
         foregroundColor: Colors.white,
@@ -87,6 +88,7 @@ class _CustomerDetailsState extends State<CustomerDetails> {
         minimumSize: Size(double.infinity, 50),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
       ),
+      child: Text('Continue'),
     );
   }
 }

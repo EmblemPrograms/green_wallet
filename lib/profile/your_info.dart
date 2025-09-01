@@ -3,7 +3,7 @@ import 'package:green_wallet/widgets/textborder.dart';
 import 'package:green_wallet/profile/chatus.dart';
 
 class YourInformationPage extends StatefulWidget {
-  const YourInformationPage({Key? key}) : super(key: key);
+  const YourInformationPage({super.key});
 
   @override
   State<YourInformationPage> createState() => _YourInformationPageState();
