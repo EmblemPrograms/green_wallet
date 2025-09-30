@@ -94,33 +94,30 @@ class _SigninState extends State<Signin> {
   }
 
   Future<void> _fetchUserProfile(String token) async {
-    final String apiUrl =
-        "https://greenwallet-app.onrender.com/api/users/profile"; // Adjust based on your backend
-    try {
-      final response = await http.get(
-        Uri.parse(apiUrl),
-        headers: {
-          "Authorization": "Bearer $token",
-          "Accept": "application/json",
-        },
-      );
+  final String apiUrl =
+      "https://greenwallet-app.onrender.com/api/users/profile?token=$token";
 
-      print("🔹 Server Response Code: ${response.statusCode}");
-      print("🔹 Server Response Body: ${response.body}");
+  try {
+    final response = await http.get(
+      Uri.parse(apiUrl),
+      headers: {"Accept": "application/json"},
+    );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        String fullName = data['full_name'] ?? "User";
+    
 
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString("full_name", fullName);
-      } else {
-        print("❌ Failed to fetch user profile: ${response.body}");
-      }
-    } catch (error) {
-      print("❌ Error fetching user profile: $error");
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      String fullName = data['full_name'] ?? "User";
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString("full_name", fullName);
+    } else {
+      print("❌ Failed to fetch user profile: ${response.body}");
     }
+  } catch (error) {
+    print("❌ Error fetching user profile: $error");
   }
+}
 
   @override
   Widget build(BuildContext context) {

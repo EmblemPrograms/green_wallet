@@ -122,7 +122,8 @@ class _homepageState extends State<homepage> {
                         CircleAvatar(
                           backgroundColor: Colors.white.withOpacity(0.2),
                           radius: 20,
-                          child: Icon(Icons.person, color: Colors.white), // Optional icon
+                          child: Icon(Icons.person,
+                              color: Colors.white), // Optional icon
                         ),
                         const SizedBox(width: 10),
                         Column(
@@ -130,7 +131,8 @@ class _homepageState extends State<homepage> {
                           children: [
                             const Text(
                               "Good Morning",
-                              style: TextStyle(color: Colors.white, fontSize: 12),
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 12),
                             ),
                             const SizedBox(height: 4),
                             Text(
@@ -161,7 +163,7 @@ class _homepageState extends State<homepage> {
               children: [
                 // Purple Background
                 Container(
-                  height: 578, // Adjust the height as needed
+                  height: MediaQuery.of(context).size.height * 0.771,
                   color: const Color(0xFF3F2771), // Purple background
                 ),
 
@@ -172,7 +174,9 @@ class _homepageState extends State<homepage> {
                   right: 0,
                   child: Container(
                     padding: const EdgeInsets.all(20),
-                    height: 420,
+                    // Responsive height: take 50% of screen height
+                    height: MediaQuery.of(context).size.height * 0.60,
+                    width: double.infinity, // Full width of the screen
                     decoration: const BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.only(
@@ -181,13 +185,16 @@ class _homepageState extends State<homepage> {
                       ),
                     ),
                     child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const SizedBox(height: 40),
+                        const SizedBox(height: 20),
                         Image.asset(
-                          'assets/virtual_card_image.png', // Replace with your image asset
-                          height: 150,
+                          'assets/virtual_card_image.png',
+                          height: MediaQuery.of(context).size.height *
+                              0.20, // 20% of screen height
+                          fit: BoxFit.contain,
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 20),
                         const Text(
                           "Create a Virtual Card",
                           style: TextStyle(
@@ -196,7 +203,7 @@ class _homepageState extends State<homepage> {
                             color: Colors.black87,
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 10),
                         const Text(
                           "Instantly create a virtual card to make managing online payments easy",
                           style: TextStyle(
@@ -219,7 +226,8 @@ class _homepageState extends State<homepage> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(25),
                             ),
-                            minimumSize: const Size(double.infinity, 50),
+                            minimumSize:
+                                const Size(double.infinity, 50), // Full width
                           ),
                           child: const Text(
                             "Get a Virtual Card",
@@ -336,8 +344,7 @@ class _homepageState extends State<homepage> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) =>
-                                              const Morep()),
+                                          builder: (context) => const Morep()),
                                     );
                                   }),
                                 ],

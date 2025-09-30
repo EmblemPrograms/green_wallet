@@ -24,56 +24,74 @@ class _CreateAccountState extends State<CreateAccount> {
   bool _isLoading = false;
 
   Future<void> registerUser() async {
-    const String apiUrl =
-        "https://greenwallet-app.onrender.com/api/users/auth/register";
-    final String userEmail = _emailController.text.trim(); // Store email entered
+  const String apiUrl =
+      "https://greenwallet-app.onrender.com/api/users/auth/register";
+  final String userEmail = _emailController.text.trim();
 
-    final Map<String, dynamic> userData = {
-      "first_name": _firstNameController.text.trim(),
-      "last_name": _lastNameController.text.trim(),
-      "email": userEmail,
-      "phone_number": "$_selectedCountryCode${_phoneController.text.trim()}",
-      "password": _passwordController.text.trim()
-    };
+  final Map<String, dynamic> userData = {
+    "first_name": _firstNameController.text.trim(),
+    "last_name": _lastNameController.text.trim(),
+    "email": userEmail,
+    "phone_number": "$_selectedCountryCode${_phoneController.text.trim()}",
+    "password": _passwordController.text.trim()
+  };
 
-    try {
-      setState(() {
-        _isLoading = true;
-      });
+  try {
+    setState(() {
+      _isLoading = true;
+    });
 
-      final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(userData),
+    final response = await http.post(
+      Uri.parse(apiUrl),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode(userData),
+    );
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (response.statusCode == 200) {
+      // ✅ Safe to decode because we expect JSON
+      final data = jsonDecode(response.body);
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(data['message'] ?? "Registration Successful")),
       );
 
-      final data = jsonDecode(response.body);
-      setState(() {
-        _isLoading = false;
-      });
-
-      if (response.statusCode == 200) {
-
-        // Show success message
+      // Navigate to OTP verification screen
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Verify(email: userEmail),
+        ),
+      );
+    } else {
+      // ❌ Could be JSON or plain text — try parsing safely
+      try {
+        final errorData = jsonDecode(response.body);
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Registration Successful: User registered. OTP sent to email.")));
-
-        // Navigate to OTP verification screen
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => Verify(email: userEmail),
-          ),
+          SnackBar(content: Text(errorData['message'] ?? "Registration failed")),
         );
-      } else {
+      } catch (_) {
+        // If response is not JSON (like "Internal Server Error")
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(data['message'] ?? "Registration failed")));
+          SnackBar(content: Text("Error ${response.statusCode}: ${response.body}")),
+        );
       }
-    } catch (error) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("Network Error. Try Again")));
     }
+  } catch (error) {
+    setState(() {
+      _isLoading = false;
+    });
+    print("❌ Registration error: $error");
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Network Error. Try Again")),
+    );
   }
+}
+
 
   bool _isPasswordObscured = true; // Password visibility toggle
   bool _isTermsAccepted = false; // Checkbox state
