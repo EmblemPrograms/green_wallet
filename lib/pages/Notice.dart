@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:green_wallet/pages/SelectId.dart';
 import 'package:green_wallet/pages/Continue.dart';
 
-class Verifyid extends StatefulWidget {
-  const Verifyid({super.key});
+class Notice extends StatefulWidget {
+  const Notice({super.key});
 
   @override
-  State<Verifyid> createState() => _VerifyidState();
+  State<Notice> createState() => _NoticeState();
 }
 
-class _VerifyidState extends State<Verifyid> {
+class _NoticeState extends State<Notice> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

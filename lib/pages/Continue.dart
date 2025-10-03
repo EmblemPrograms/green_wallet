@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:green_wallet/pages/VerifyId.dart';
-import 'package:green_wallet/pages/Pin_setup.dart';
+import 'package:green_wallet/pages/Notice.dart';
+import 'package:green_wallet/pages/NoticeID.dart';
 
 class Continue extends StatefulWidget {
   const Continue({super.key});
@@ -25,7 +25,7 @@ class _ContinueState extends State<Continue> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => PinSetup(),
+                  builder: (context) => NoticeId(),
                 ),
               );
             },
@@ -85,7 +85,7 @@ class _ContinueState extends State<Continue> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => Verifyid(),
+                    builder: (context) => Notice(),
                   ),
                 );// Handle continue button click
               },

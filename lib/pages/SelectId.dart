@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:green_wallet/pages/Take_Photo.dart';
-import 'package:green_wallet/pages/VerifyId.dart';
+import 'package:green_wallet/pages/Notice.dart';
 
 class Selectid extends StatefulWidget {
   const Selectid({super.key});
@@ -22,7 +22,7 @@ class _SelectidState extends State<Selectid> {
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black),
           onPressed: () {
             Navigator.push(
-                context, MaterialPageRoute(builder: (context) => Verifyid()));
+                context, MaterialPageRoute(builder: (context) => Notice()));
           },
         ),
         title: Text(

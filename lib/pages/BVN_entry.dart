@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:green_wallet/Card/Validate_card.dart';
+import 'package:green_wallet/Card/hompage.dart';
 
 class BvnEntry extends StatefulWidget {
   const BvnEntry({super.key});
@@ -97,7 +97,7 @@ class _BvnEntryState extends State<BvnEntry> {
                   ? () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ValidateCard()),
+                  MaterialPageRoute(builder: (context) => hompage()),
                 );
               }
                   : null, // Disable the button if BVN is invalid
@@ -111,7 +111,7 @@ class _BvnEntryState extends State<BvnEntry> {
                 minimumSize: const Size(double.infinity, 50), // Full-width button
               ),
               child: const Text(
-                "Create Virtual Card",
+                "Verify",
                 style: TextStyle(fontSize: 16, color: Colors.white),
               ),
             ),

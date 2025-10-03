@@ -4,20 +4,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:green_wallet/pages/Startup.dart';
 import 'package:http/http.dart' as http;
-import 'package:green_wallet/pages/Setup.dart';
+import 'package:green_wallet/pages/AccountSetup.dart';
 import 'package:green_wallet/widgets/textborder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class Verify extends StatefulWidget {
+class Otp extends StatefulWidget {
   final String email; // Ensure this is present
 
-  const Verify({super.key, required this.email});
+  const Otp({super.key, required this.email});
 
   @override
-  State<Verify> createState() => _VerifyState();
+  State<Otp> createState() => _OtpState();
 }
 
-class _VerifyState extends State<Verify> {
+class _OtpState extends State<Otp> {
   int secondsRemaining = 59;
   late Timer timer;
   bool invalidOtp = false;
@@ -101,7 +101,7 @@ class _VerifyState extends State<Verify> {
     }
 
     final String apiUrl =
-        "https://greenwallet-app.onrender.com/api/users/verify-otp"
+        "https://greenwallet-6a1m.onrender.com/api/users/verify-otp"
         "?email=${widget.email}&otp=$enteredOTP";
 
     try {

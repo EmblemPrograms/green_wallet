@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:green_wallet/Card/BVN_entry.dart';
+import 'package:green_wallet/pages/BVN_entry.dart';
 
 class Virtual1 extends StatefulWidget {
   const Virtual1({super.key});

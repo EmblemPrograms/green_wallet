@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:green_wallet/pages/verify.dart';
+import 'package:green_wallet/pages/Otp.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:green_wallet/widgets/textborder.dart';
@@ -25,7 +25,7 @@ class _CreateAccountState extends State<CreateAccount> {
 
   Future<void> registerUser() async {
   const String apiUrl =
-      "https://greenwallet-app.onrender.com/api/users/auth/register";
+      "https://greenwallet-6a1m.onrender.com/api/users/auth/register";
   final String userEmail = _emailController.text.trim();
 
   final Map<String, dynamic> userData = {
@@ -64,7 +64,7 @@ class _CreateAccountState extends State<CreateAccount> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => Verify(email: userEmail),
+          builder: (context) => Otp(email: userEmail),
         ),
       );
     } else {

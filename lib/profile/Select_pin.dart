@@ -68,7 +68,7 @@ class _SelectPinState extends State<SelectPin> {
       }
 
       final String apiUrl =
-          "https://greenwallet-app.onrender.com/api/users/users/pin/set?token=$token";
+          "https://greenwallet-6a1m.onrender.com/api/users/users/pin/set?token=$token";
 
       final response = await http.post(
         Uri.parse(apiUrl),

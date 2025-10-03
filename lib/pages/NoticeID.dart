@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:green_wallet/pages/Continue.dart';
-import 'package:green_wallet/pages/Setup.dart';
+import 'package:green_wallet/pages/AccountSetup.dart';
 
 
-class PinSetup extends StatefulWidget {
-  const PinSetup({super.key});
+class NoticeId extends StatefulWidget {
+  const NoticeId({super.key});
 
   @override
-  State<PinSetup> createState() => _PinSetupState();
+  State<NoticeId> createState() => _NoticeIdState();
 }
 
-class _PinSetupState extends State<PinSetup> {
+class _NoticeIdState extends State<NoticeId> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
