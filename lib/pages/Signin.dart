@@ -60,23 +60,23 @@ class _SigninState extends State<Signin> {
 
         // ✅ Fetch and Save Full Name
         await _fetchUserProfile(token);
-        if (context.mounted) {
-          Navigator.of(context).pop();
-        }
 
-        // Show CustomDialogWidget
-        if (context.mounted) {
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (context) => CustomDialogWidget(),
-          );
-        }
-        // ✅ Navigate to homepage
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => hompage()),
+        if (!context.mounted) return;
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const CustomDialogWidget(),
         );
+
+// Auto redirect after 2 seconds
+        Future.delayed(const Duration(seconds: 3), () {
+          Navigator.of(context).pop(); // close dialog
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => hompage()),
+          );
+        });
+
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Login failed: ${response.body}")),
@@ -108,9 +108,11 @@ class _SigninState extends State<Signin> {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       String fullName = data['full_name'] ?? "User";
+      String email = data['email'] ?? "User";
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString("full_name", fullName);
+      await prefs.setString("email", email);
     } else {
       print("❌ Failed to fetch user profile: ${response.body}");
     }

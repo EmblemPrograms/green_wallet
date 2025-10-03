@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:green_wallet/widgets/textborder.dart';
 import 'package:green_wallet/profile/chatus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class YourInformationPage extends StatefulWidget {
   const YourInformationPage({super.key});
@@ -10,12 +11,30 @@ class YourInformationPage extends StatefulWidget {
 }
 
 class _YourInformationPageState extends State<YourInformationPage> {
-  final TextEditingController _firstNameController = TextEditingController(text: 'Abdul');
-  final TextEditingController _lastNameController = TextEditingController(text: 'Gafar');
-  final TextEditingController _emailController = TextEditingController(text: 'Abdulgafar@gmail.com');
+  final TextEditingController _fullNameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+
   final TextEditingController _dateController = TextEditingController();
 
   String? _selectedGender;
+  String _fullName = "Loading..."; // Default value
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    setState(() {
+      _fullName = prefs.getString("full_name") ?? "User Name";
+      _fullNameController.text = prefs.getString("full_name") ?? "";
+      _emailController.text = prefs.getString("email") ?? "";
+    });
+  }
+
 
   Future<void> _pickDate() async {
     DateTime? pickedDate = await showDatePicker(
@@ -60,8 +79,8 @@ class _YourInformationPageState extends State<YourInformationPage> {
               backgroundImage: AssetImage('assets/avatar.png'), // Replace with your image path
             ),
             const SizedBox(height: 10),
-            const Text(
-              "Abdul Gafar",
+             Text(
+              _fullName,
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             const Text("GreenWallet Account", style: TextStyle(color: Colors.grey)),
@@ -69,20 +88,14 @@ class _YourInformationPageState extends State<YourInformationPage> {
             const SizedBox(height: 30),
 
             // First Name
-            _buildLabel("First Name"),
-            _buildTextField(_firstNameController),
+            _buildLabel("Full Name"),
+            _buildTextField(_fullNameController),
 
             const SizedBox(height: 16),
 
-            // Last Name
-            _buildLabel("Last Name"),
-            _buildTextField(_lastNameController),
-
-            const SizedBox(height: 16),
-
-            // Email
             _buildLabel("Email Address"),
             _buildTextField(_emailController),
+
 
             const SizedBox(height: 16),
 

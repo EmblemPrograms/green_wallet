@@ -11,92 +11,131 @@ class CreateAccount extends StatefulWidget {
   const CreateAccount({super.key});
 
   @override
-  _CreateAccountState createState() => _CreateAccountState();
+  State<CreateAccount> createState() => _CreateAccountState();
 }
 
 class _CreateAccountState extends State<CreateAccount> {
-  String _selectedCountryCode = "+1"; // Default country code (USA)
+  // Controllers
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  // Focus nodes
+  final FocusNode _emailFocusNode = FocusNode();
+
+  // Form key
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  // States
+  String _selectedCountryCode = "+1"; // Default USA
   bool _isLoading = false;
+  bool _isPasswordObscured = true;
+  bool _isTermsAccepted = false;
 
-  Future<void> registerUser() async {
-  const String apiUrl =
+  // API Endpoint
+  static const String _apiUrl =
       "https://greenwallet-6a1m.onrender.com/api/users/auth/register";
-  final String userEmail = _emailController.text.trim();
 
-  final Map<String, dynamic> userData = {
-    "first_name": _firstNameController.text.trim(),
-    "last_name": _lastNameController.text.trim(),
-    "email": userEmail,
-    "phone_number": "$_selectedCountryCode${_phoneController.text.trim()}",
-    "password": _passwordController.text.trim()
-  };
-
-  try {
-    setState(() {
-      _isLoading = true;
-    });
-
-    final response = await http.post(
-      Uri.parse(apiUrl),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode(userData),
-    );
-
-    setState(() {
-      _isLoading = false;
-    });
-
-    if (response.statusCode == 200) {
-      // ✅ Safe to decode because we expect JSON
-      final data = jsonDecode(response.body);
-
-      // Show success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(data['message'] ?? "Registration Successful")),
-      );
-
-      // Navigate to OTP verification screen
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => Otp(email: userEmail),
-        ),
-      );
-    } else {
-      // ❌ Could be JSON or plain text — try parsing safely
-      try {
-        final errorData = jsonDecode(response.body);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(errorData['message'] ?? "Registration failed")),
-        );
-      } catch (_) {
-        // If response is not JSON (like "Internal Server Error")
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error ${response.statusCode}: ${response.body}")),
-        );
-      }
-    }
-  } catch (error) {
-    setState(() {
-      _isLoading = false;
-    });
-    print("❌ Registration error: $error");
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Network Error. Try Again")),
-    );
+  @override
+  void initState() {
+    super.initState();
   }
-}
+
+  @override
+  void dispose() {
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    _passwordController.dispose();
+    _emailFocusNode.dispose();
+    super.dispose();
+  }
 
 
-  bool _isPasswordObscured = true; // Password visibility toggle
-  bool _isTermsAccepted = false; // Checkbox state
-  // bool agreePersonalData = true;
-  final globalKey = GlobalKey<FormState>();
+
+  String? validateEmail(String? value) {
+    if (value == null || value.isEmpty) {
+      return "Email is required";
+    }
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(value.trim())) {
+      return "Enter a valid email address";
+    }
+    return null;
+  }
+
+  Future<void> _registerUser() async {
+    final String userEmail = _emailController.text.trim();
+
+    // Extra email check before registering
+    final emailError = validateEmail(userEmail);
+    if (emailError != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("❌ $emailError")),
+      );
+      return; // stop here if invalid
+    }
+
+    final Map<String, dynamic> userData = {
+      "first_name": _firstNameController.text.trim(),
+      "last_name": _lastNameController.text.trim(),
+      "email": userEmail,
+      "phone_number": "$_selectedCountryCode${_phoneController.text.trim()}",
+      "password": _passwordController.text.trim(),
+    };
+
+    try {
+      setState(() => _isLoading = true);
+
+      final response = await http.post(
+        Uri.parse(_apiUrl),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(userData),
+      );
+
+      setState(() => _isLoading = false);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['message'] ?? "Registration Successful")),
+        );
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Otp(email: userEmail),
+          ),
+        );
+      } else {
+        _handleErrorResponse(response);
+      }
+    } catch (error) {
+      setState(() => _isLoading = false);
+      debugPrint("❌ Registration error: $error");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Network Error. Try Again")),
+      );
+    }
+  }
+
+  void _handleErrorResponse(http.Response response) {
+    try {
+      final errorData = jsonDecode(response.body);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorData['message'] ?? "Registration failed")),
+      );
+    } catch (_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error ${response.statusCode}: ${response.body}")),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -152,7 +191,7 @@ class _CreateAccountState extends State<CreateAccount> {
       ),
       body: SingleChildScrollView(
         child: Form(
-          key: globalKey,
+          key: _formKey,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: Column(
@@ -224,7 +263,10 @@ class _CreateAccountState extends State<CreateAccount> {
                 const SizedBox(height: 5),
                 TextFormField(
                   controller: _emailController,
-                  validator: filltextbox,
+                  validator: validateEmail,
+                  focusNode: _emailFocusNode,
+                  keyboardType: TextInputType.emailAddress,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -379,12 +421,18 @@ class _CreateAccountState extends State<CreateAccount> {
                 ElevatedButton(
                   onPressed: _isTermsAccepted
                       ? () {
-                          if (globalKey.currentState!.validate()) {
-                            // Corrected validation logic
-                            registerUser();
-                            // Proceed to the next step
-                          }
-                        }
+                    if (_formKey.currentState!.validate()) {
+                      // Explicit email validation on button press
+                      final emailError = validateEmail(_emailController.text.trim());
+                      if (emailError == null) {
+                        _registerUser();
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("❌ $emailError")),
+                        );
+                      }
+                    }
+                  }
                       : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _isTermsAccepted

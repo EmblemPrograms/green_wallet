@@ -7,9 +7,10 @@ import 'package:green_wallet/Card/Account_details.dart';
 import 'package:green_wallet/Card/Invoice.dart';
 import 'package:green_wallet/Card/VCard.dart';
 import 'package:green_wallet/Card/Profile.dart';
+import 'package:green_wallet/pages/BVN_entry.dart';
 import 'package:green_wallet/widgets/Navigation_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'Virtual.dart';
+
 
 // Helper method for bottom navigation items
 
@@ -196,7 +197,7 @@ class _homepageState extends State<homepage> {
                         ),
                         const SizedBox(height: 20),
                         const Text(
-                          "Create a Virtual Card",
+                          "Verify Your BVN",
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -205,7 +206,7 @@ class _homepageState extends State<homepage> {
                         ),
                         const SizedBox(height: 10),
                         const Text(
-                          "Instantly create a virtual card to make managing online payments easy",
+                          "Instantly verify your BVN to make managing online payments easy",
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.black54,
@@ -218,7 +219,7 @@ class _homepageState extends State<homepage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => const Virtual()),
+                                  builder: (context) => const BvnEntry()),
                             );
                           },
                           style: ElevatedButton.styleFrom(
@@ -230,7 +231,7 @@ class _homepageState extends State<homepage> {
                                 const Size(double.infinity, 50), // Full width
                           ),
                           child: const Text(
-                            "Get a Virtual Card",
+                            "Verify BVN",
                             style: TextStyle(fontSize: 16, color: Colors.white),
                           ),
                         ),

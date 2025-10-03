@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AccountDetails extends StatefulWidget {
   const AccountDetails({super.key});
@@ -14,6 +15,19 @@ class _AccountDetailsState extends State<AccountDetails> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Copied to clipboard")),
     );
+  }
+  String _fullName = "Loading..."; // Default value
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFullName();
+  }
+  Future<void> _loadFullName() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _fullName = prefs.getString("full_name") ?? "User Name";
+    });
   }
 
   Widget _buildAccountDetailRow(String title, String value) {
@@ -113,7 +127,7 @@ class _AccountDetailsState extends State<AccountDetails> {
               ),
               child: Column(
                 children: [
-                  _buildAccountDetailRow("Account Holder", "Abdul Gafar"),
+                  _buildAccountDetailRow("Account Holder", _fullName),
                   _buildAccountDetailRow(
                       "Bank Name", "hjlsaknfn;na j;jil;lnljlkbauVHVU"),
                   _buildAccountDetailRow("Account Number", "324152637489"),

@@ -249,33 +249,7 @@ class _SelectPinState extends State<SelectPin> {
               //   // Handle PIN submission
               //   final pin = _controllers.map((c) => c.text).join();
               //   print("Entered PIN: $pin");
-              //   showDialog(
-              //     context: context,
-              //     barrierDismissible: false,
-              //     builder: (context) {
-              //       return Dialog(
-              //         backgroundColor: Colors.transparent,
-              //         child: Center(
-              //           child: CircularProgressIndicator(
-              //             color: Color(0xFF3F2771),
-              //           ),
-              //         ),
-              //       );
-              //     },
-              //   );
-              //
-              //   // Simulate loading
-              //   await Future.delayed(Duration(seconds: 2));
-              //   Navigator.of(context).pop(); // Close the loading dialog
-              //
-              //   // Show CustomDialogWidget
-              //   showDialog(
-              //     context: context,
-              //     barrierDismissible: false,
-              //     builder: (context) => CustomDialogWidget(),
-              //   );
-              // }
-              //     : null,
+
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
                 backgroundColor:

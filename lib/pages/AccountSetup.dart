@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
+import 'package:green_wallet/widgets/Dialog.dart';
 
 import 'Startup.dart';
 
@@ -77,61 +78,117 @@ class _SetupState extends State<Setup> {
       final String apiUrl =
           "https://greenwallet-6a1m.onrender.com/api/users/users/profile/update?token=$token";
 
-      var body = jsonEncode({
-        "home_address": _homeAddressController.text,
-        "country": _selectedCountry ?? "",
-        "state": _stateController.text,
-        "city": _cityController.text,
-        "date_of_birth": _dateController.text,
-        "gender": _selectedGender ?? "",
-        "occupation": _selectedOccupation ?? "",
-        "utility_bill": "placeholder_string" // ✅ Save a string instead of a file URL
-      });
+      var request = http.MultipartRequest("PUT", Uri.parse(apiUrl));
 
-      final response = await http.put(
-        Uri.parse(apiUrl),
-        headers: {
-          "accept": "application/json",
-          "Content-Type": "application/json"
-        },
-        body: body,
-      );
+      // ✅ Add text fields
+      request.fields['home_address'] = _homeAddressController.text;
+      request.fields['country'] = _selectedCountry ?? "";
+      request.fields['state'] = _stateController.text;
+      request.fields['city'] = _cityController.text;
+      request.fields['date_of_birth'] = _dateController.text;
+      request.fields['gender'] = _selectedGender ?? "";
+      request.fields['occupation'] = _selectedOccupation ?? "";
+
+      // ✅ Add file if selected
+      if (_selectedFile != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            'utility_bill',
+            _selectedFile!.path,
+          ),
+        );
+      }
+
+      // ✅ Send request
+      var response = await request.send();
 
       setState(() {
         _isLoading = false;
       });
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        final respStr = await response.stream.bytesToString();
+        final data = jsonDecode(respStr);
+
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data['message'] ?? "Profile updated successfully!")),
+          SnackBar(
+              content:
+                  Text(data['message'] ?? "Profile updated successfully!")),
         );
 
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => BvnEntry()),
+        await _fetchUserProfile(token);
+
+        // Show loading dialog
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) {
+            return Dialog(
+              backgroundColor: Colors.transparent,
+              child: Center(
+                child: CircularProgressIndicator(
+                  color: Color(0xFF3F2771),
+                ),
+              ),
+            );
+          },
+        );
+
+        // Simulate loading delay
+        await Future.delayed(const Duration(seconds: 2));
+        Navigator.of(context).pop(); // Close loading dialog
+
+        // Show success custom dialog
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => CustomDialogWidget(),
         );
       } else {
+        final respStr = await response.stream.bytesToString();
         print("❌ Server Error: ${response.statusCode}");
-        print("❌ Response Body: ${response.body}");
+        print("❌ Response Body: $respStr");
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error: ${response.statusCode}, ${response.body}")),
+          SnackBar(content: Text("Error: ${response.statusCode}, $respStr")),
         );
       }
     } catch (error) {
       setState(() {
         _isLoading = false;
       });
-
       print("❌ Network Error: $error");
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Network error, try again!")),
       );
     }
   }
 
+  Future<void> _fetchUserProfile(String token) async {
+    final String apiUrl =
+        "https://greenwallet-6a1m.onrender.com/api/users/profile?token=$token";
+
+    try {
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {"Accept": "application/json"},
+      );
+
+
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        String fullName = data['full_name'] ?? "User";
+
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString("full_name", fullName);
+      } else {
+        print("❌ Failed to fetch user profile: ${response.body}");
+      }
+    } catch (error) {
+      print("❌ Error fetching user profile: $error");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -427,7 +484,8 @@ class _SetupState extends State<Setup> {
                       _selectedOccupation = value;
                     });
                   },
-                  validator: (value) => value == null ? "Select occupation" : null,
+                  validator: (value) =>
+                      value == null ? "Select occupation" : null,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -447,7 +505,9 @@ class _SetupState extends State<Setup> {
                   onPressed: _isLoading ? null : updateProfile,
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 50),
-                    backgroundColor: _isLoading ? Colors.grey : const Color(0xFF3F2771), // Changes color
+                    backgroundColor: _isLoading
+                        ? Colors.grey
+                        : const Color(0xFF3F2771), // Changes color
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
                     ),
@@ -455,11 +515,10 @@ class _SetupState extends State<Setup> {
                   child: _isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
                       : const Text(
-                    "Next",
-                    style: TextStyle(color: Colors.white, fontSize: 16),
-                  ),
+                          "Next",
+                          style: TextStyle(color: Colors.white, fontSize: 16),
+                        ),
                 ),
-
                 const SizedBox(height: 40),
               ],
             ),

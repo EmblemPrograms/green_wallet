@@ -1,9 +1,12 @@
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:green_wallet/pages/SelectId.dart';
 import 'package:green_wallet/pages/Setup_pin.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
+
 
 class TakePhoto extends StatefulWidget {
   const TakePhoto({super.key});
@@ -123,7 +126,7 @@ class _TakePhotoState extends State<TakePhoto> {
                     onPressed: () async {
                       final picker = ImagePicker();
                       final XFile? image =
-                          await picker.pickImage(source: ImageSource.camera);
+                      await picker.pickImage(source: ImageSource.camera);
 
                       if (image != null) {
                         setState(() {
@@ -134,7 +137,7 @@ class _TakePhotoState extends State<TakePhoto> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                               content:
-                                  Text("📷 Selfie captured: ${image.name}")),
+                              Text("📷 Selfie captured: ${image.name}")),
                         );
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
