@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:green_wallet/pages/BVN_entry.dart';
+import 'package:green_wallet/Card/hompage.dart';
 
 class Virtual1 extends StatefulWidget {
   const Virtual1({super.key});
@@ -83,7 +83,7 @@ class _Virtual1State extends State<Virtual1> {
                 // Add your logic to create a virtual card
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => BvnEntry()),
+                  MaterialPageRoute(builder: (context) => hompage()),
                 );
               },
               style: ElevatedButton.styleFrom(

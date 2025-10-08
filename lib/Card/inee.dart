@@ -42,7 +42,7 @@ class _BvnEntryState extends State<BvnEntry> {
     final token = await AuthService.getToken();
     if (token == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("⚠️ Logout and Login Again.")),
+        const SnackBar(content: Text("⚠️ Login required.")),
       );
       return;
     }
@@ -357,12 +357,4 @@ class CustomDialogWidget1 extends StatelessWidget {
       ),
     );
   }
-}
-
-
-String? filltextbox(String? text) {
-  if (text == null || text.trim().isEmpty) {
-    return 'Field cannot be empty';
-  }
-  return null;
 }

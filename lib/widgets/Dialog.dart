@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../Card/hompage.dart';
+import 'package:green_wallet/pages/Signin.dart';
 
 class CustomDialogWidget extends StatelessWidget {
   const CustomDialogWidget({super.key});
@@ -12,7 +11,7 @@ class CustomDialogWidget extends StatelessWidget {
         Navigator.of(context).pop(); // Close the dialog
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-              builder: (context) => hompage()), // Pass required parameter
+              builder: (context) => Signin()), // Pass required parameter
         );
       }
     });
@@ -57,7 +56,7 @@ class CustomDialogWidget extends StatelessWidget {
             SizedBox(height: 8),
 // Subtitle
             Text(
-              "Continue to the next step and enjoy our services!",
+              "Login to enjoy our services!",
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.black54,

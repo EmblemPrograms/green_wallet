@@ -1,7 +1,5 @@
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:green_wallet/pages/SelectId.dart';
+import 'package:green_wallet/pages/IDVerify.dart';
 import 'package:green_wallet/pages/Setup_pin.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
@@ -53,7 +51,7 @@ class _TakePhotoState extends State<TakePhoto> {
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black),
           onPressed: () {
             Navigator.push(
-                context, MaterialPageRoute(builder: (context) => Selectid()));
+                context, MaterialPageRoute(builder: (context) => IDVerify()));
           },
         ),
         centerTitle: true,

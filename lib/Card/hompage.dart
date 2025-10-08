@@ -1,16 +1,18 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:green_wallet/ActionB/Convert.dart';
 import 'package:green_wallet/ActionB/MoreP.dart';
 import 'package:green_wallet/ActionB/Send.dart';
 import 'package:green_wallet/ActionB/TopUp.dart';
-import 'package:green_wallet/Card/Account_details.dart';
 import 'package:green_wallet/Card/Invoice.dart';
 import 'package:green_wallet/Card/VCard.dart';
 import 'package:green_wallet/Card/Profile.dart';
 import 'package:green_wallet/pages/BVN_entry.dart';
+import 'package:green_wallet/services/auth_service.dart';
 import 'package:green_wallet/widgets/Navigation_bar.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:green_wallet/widgets/profileheader.dart';
+import 'package:green_wallet/pages/NoticeID.dart';
+import 'package:http/http.dart' as http;
 
 // Helper method for bottom navigation items
 
@@ -80,18 +82,44 @@ class homepage extends StatefulWidget {
 class _homepageState extends State<homepage> {
   bool _isObscured = true;
   String _fullName = "Loading..."; // Default value
+  String _kycTier = "0"; // Default: not verified
 
   @override
   void initState() {
     super.initState();
-    _loadFullName();
+    _loadUserData();
   }
 
-  Future<void> _loadFullName() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _fullName = prefs.getString("full_name") ?? "User Name";
-    });
+  Future<void> _loadUserData() async {
+    String? token = await AuthService.getToken(); // ✅ fetch from storage
+
+    if (token == null) {
+      print("❌ No token found");
+      return;
+    }
+
+    final url =
+        "https://greenwallet-6a1m.onrender.com/api/users/profile?token=$token";
+    final response =
+        await http.get(Uri.parse(url), headers: {"Accept": "application/json"});
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+
+      setState(() {
+        _fullName = data['full_name'] ?? "User";
+        _kycTier = data['kyc_tier']?.toString() ?? "0";
+      });
+
+      await AuthService.saveUserProfile(
+        data['full_name'] ?? "User",
+        data['email'] ?? "Unknown",
+      );
+
+      await AuthService.saveKycTier(_kycTier);
+    } else {
+      debugPrint("❌ Profile fetch failed: ${response.body}");
+    }
   }
 
   @override
@@ -108,47 +136,7 @@ class _homepageState extends State<homepage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // User Info Section
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const AccountDetails(),
-                        ),
-                      );
-                    },
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          backgroundColor: Colors.white.withOpacity(0.2),
-                          radius: 20,
-                          child: Icon(Icons.person,
-                              color: Colors.white), // Optional icon
-                        ),
-                        const SizedBox(width: 10),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              "Good Morning",
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 12),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              _fullName,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
+                  const ProfileHeader(),
                   // Notification Icon
                   CircleAvatar(
                     backgroundColor: Colors.white.withOpacity(0.2),
@@ -185,58 +173,9 @@ class _homepageState extends State<homepage> {
                         topRight: Radius.circular(30),
                       ),
                     ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const SizedBox(height: 20),
-                        Image.asset(
-                          'assets/virtual_card_image.png',
-                          height: MediaQuery.of(context).size.height *
-                              0.20, // 20% of screen height
-                          fit: BoxFit.contain,
-                        ),
-                        const SizedBox(height: 20),
-                        const Text(
-                          "Verify Your BVN",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        const Text(
-                          "Instantly verify your BVN to make managing online payments easy",
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.black54,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const BvnEntry()),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF3F2771),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25),
-                            ),
-                            minimumSize:
-                                const Size(double.infinity, 50), // Full width
-                          ),
-                          child: const Text(
-                            "Verify BVN",
-                            style: TextStyle(fontSize: 16, color: Colors.white),
-                          ),
-                        ),
-                      ],
-                    ),
+                    child: _kycTier == "1"
+                        ? _buildUpgradeToTier2()
+                        : _buildVerifyBvnSection(),
                   ),
                 ),
 
@@ -305,7 +244,7 @@ class _homepageState extends State<homepage> {
                                     onPressed: () {
                                       setState(() {
                                         _isObscured =
-                                            !_isObscured; // Toggle password visibility
+                                            !_isObscured; // Toggle visibility
                                       });
                                     },
                                   ),
@@ -362,6 +301,101 @@ class _homepageState extends State<homepage> {
           ],
         ),
       ),
+    );
+  }
+
+// 🟣 Shown if user has NOT verified BVN (kyc_tier != 1)
+  Widget _buildVerifyBvnSection() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const SizedBox(height: 20),
+        Image.asset(
+          'assets/virtual_card_image.png',
+          height:
+              MediaQuery.of(context).size.height * 0.20, // 20% of screen height
+          fit: BoxFit.contain,
+        ),
+        const SizedBox(height: 20),
+        const Text(
+          "Verify Your BVN",
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 10),
+        const Text(
+          "Instantly verify your BVN to make managing online payments easy",
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.black54,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 20),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const BvnEntry()),
+            );
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF3F2771),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(25),
+            ),
+            minimumSize: const Size(double.infinity, 50), // Full width
+          ),
+          child: const Text(
+            "Verify BVN",
+            style: TextStyle(fontSize: 16, color: Colors.white),
+          ),
+        ),
+      ],
+    );
+  }
+
+// 🟢 Shown if KYC Tier 1 is already completed
+  Widget _buildUpgradeToTier2() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Icon(Icons.verified, color: Colors.green, size: 80),
+        const SizedBox(height: 20),
+        const Text(
+          "You're verified to Tier 1!",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        const Text(
+          "Upgrade to Tier 2 to unlock more features",
+          style: TextStyle(fontSize: 14, color: Colors.black54),
+        ),
+        const SizedBox(height: 20),
+        ElevatedButton(
+          onPressed: () {
+            // Navigate to Tier 2 upgrade screen
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const NoticeId()),
+            );
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Color(0xFF3F2771),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(25),
+            ),
+            minimumSize: const Size(double.infinity, 50),
+          ),
+          child: const Text(
+            "Upgrade to Tier 2",
+            style: TextStyle(fontSize: 16, color: Colors.white),
+          ),
+        ),
+      ],
     );
   }
 }

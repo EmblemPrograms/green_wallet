@@ -5,6 +5,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:green_wallet/Card/hompage.dart';
 
+import '../services/auth_service.dart';
+
 class Signin extends StatefulWidget {
   const Signin({super.key});
 
@@ -93,33 +95,41 @@ class _SigninState extends State<Signin> {
     }
   }
 
+
   Future<void> _fetchUserProfile(String token) async {
-  final String apiUrl =
-      "https://greenwallet-6a1m.onrender.com/api/users/profile?token=$token";
+    final url =
+        "https://greenwallet-6a1m.onrender.com/api/users/profile?token=$token";
 
-  try {
-    final response = await http.get(
-      Uri.parse(apiUrl),
-      headers: {"Accept": "application/json"},
-    );
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {"Accept": "application/json"},
+      );
 
-    
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      String fullName = data['full_name'] ?? "User";
-      String email = data['email'] ?? "User";
+        // 🟢 Save profile info
+        await AuthService.saveUserProfile(
+          data['full_name'] ?? "User",
+          data['email'] ?? "Unknown",
+        );
 
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString("full_name", fullName);
-      await prefs.setString("email", email);
-    } else {
-      print("❌ Failed to fetch user profile: ${response.body}");
+        // 🟣 Save KYC tier (added)
+        await AuthService.saveKycTier(
+          data['kyc_tier']?.toString() ?? "0", // Default "0" if not verified
+        );
+
+        debugPrint("✅ Profile & KYC saved successfully");
+      } else {
+        debugPrint("❌ Profile fetch failed: ${response.body}");
+      }
+    } catch (error) {
+      debugPrint("⚠️ Error fetching user profile: $error");
     }
-  } catch (error) {
-    print("❌ Error fetching user profile: $error");
   }
-}
+
+
 
   @override
   Widget build(BuildContext context) {

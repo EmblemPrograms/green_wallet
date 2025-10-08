@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:country_picker/country_picker.dart';
-import 'package:green_wallet/pages/BVN_entry.dart';
 import 'package:green_wallet/widgets/textborder.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';

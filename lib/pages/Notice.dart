@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:green_wallet/pages/SelectId.dart';
+import 'package:green_wallet/pages/IDVerify.dart';
 import 'package:green_wallet/pages/Continue.dart';
 
 class Notice extends StatefulWidget {
@@ -125,7 +125,7 @@ class _NoticeState extends State<Notice> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => Selectid(),
+                          builder: (context) => IDVerify(),
                         ),
                       );// Handle Accept button press
                     },

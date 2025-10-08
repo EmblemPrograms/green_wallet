@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:green_wallet/pages/Continue.dart';
-import 'package:green_wallet/pages/AccountSetup.dart';
 
 
 class NoticeId extends StatefulWidget {
@@ -19,8 +18,7 @@ class _NoticeIdState extends State<NoticeId> {
           backgroundColor: const Color(0xFF3F2771),
         leading: IconButton(
           onPressed: () {
-            Navigator.push(
-                context, MaterialPageRoute(builder: (context) => Setup()));
+            Navigator.pop(context);
           },
           icon: Icon(Icons.arrow_back_ios_new_rounded,
             color: Colors.white,
