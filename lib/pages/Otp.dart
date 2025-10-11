@@ -216,108 +216,110 @@ class _OtpState extends State<Otp> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          const SizedBox(height: 40),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Verify your Email",
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(height: 40),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Verify your Email",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  "Verifying OTP for ${widget.email}",
-                  // Show email from CreateAccount
-                  textAlign: TextAlign.start,
-                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                ),
-              ],
+                  const SizedBox(height: 10),
+                  Text(
+                    "Verifying OTP for ${widget.email}",
+                    // Show email from CreateAccount
+                    textAlign: TextAlign.start,
+                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 30),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: List.generate(4, (index) => _otpField(index)),
-                ),
-                const SizedBox(height: 10),
-                const SizedBox(height: 30),
-                ElevatedButton(
-                  onPressed: isButtonActive ? verifyOTP : null,
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(310, 50),
-                    backgroundColor:
-                        isButtonActive ? const Color(0xFF3F2771) : Colors.grey,
-                    // Change color based on field status // Disabled color
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 15,
-                      horizontal: 20,
-                    ),
+            const SizedBox(height: 30),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: List.generate(4, (index) => _otpField(index)),
                   ),
-                  child: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text(
-                          "Verify",
-                          style: TextStyle(fontSize: 16, color: Colors.white),
-                        ),
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  "00:${secondsRemaining.toString().padLeft(2, '0')}",
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.purple,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      "Didn't get the code? ",
-                      style: TextStyle(fontSize: 14, color: Colors.black),
-                    ),
-                    TextButton(
-                      onPressed: secondsRemaining == 0
-                          ? () {
-                              setState(() {
-                                secondsRemaining = 59;
-                                startTimer();
-                              });
-                            }
-                          : null,
-                      child: Text(
-                        "Resend",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: secondsRemaining == 0
-                              ? Colors.purple
-                              : Colors.grey,
-                        ),
+                  const SizedBox(height: 10),
+                  const SizedBox(height: 30),
+                  ElevatedButton(
+                    onPressed: isButtonActive ? verifyOTP : null,
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(310, 50),
+                      backgroundColor:
+                          isButtonActive ? const Color(0xFF3F2771) : Colors.grey,
+                      // Change color based on field status // Disabled color
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 15,
+                        horizontal: 20,
                       ),
                     ),
-                  ],
-                ),
-              ],
-            ),
-          )
-        ],
+                    child: _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text(
+                            "Verify",
+                            style: TextStyle(fontSize: 16, color: Colors.white),
+                          ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    "00:${secondsRemaining.toString().padLeft(2, '0')}",
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.purple,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        "Didn't get the code? ",
+                        style: TextStyle(fontSize: 14, color: Colors.black),
+                      ),
+                      TextButton(
+                        onPressed: secondsRemaining == 0
+                            ? () {
+                                setState(() {
+                                  secondsRemaining = 59;
+                                  startTimer();
+                                });
+                              }
+                            : null,
+                        child: Text(
+                          "Resend",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: secondsRemaining == 0
+                                ? Colors.purple
+                                : Colors.grey,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

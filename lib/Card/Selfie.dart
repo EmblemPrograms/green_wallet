@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
-import 'Create_card.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import '../services/auth_service.dart';
+import '../Card/hompage.dart';
 
 class Selfie extends StatefulWidget {
   const Selfie({super.key});
@@ -12,15 +16,14 @@ class Selfie extends StatefulWidget {
 
 class _SelfieState extends State<Selfie> {
   File? _selfieImage;
-  String? fileName;// To store the captured selfie
+  String? fileName; // To store the captured selfie
   final picker = ImagePicker();
 
   // Method to open the camera and take a selfie
   Future<void> takeSelfie() async {
     try {
       final picker = ImagePicker();
-      final XFile? image =
-      await picker.pickImage(source: ImageSource.camera);
+      final XFile? image = await picker.pickImage(source: ImageSource.camera);
 
       if (image != null) {
         setState(() {
@@ -29,9 +32,7 @@ class _SelfieState extends State<Selfie> {
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content:
-              Text("📷 Selfie captured: ${image.name}")),
+          SnackBar(content: Text("📷 Selfie captured: ${image.name}")),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -44,12 +45,111 @@ class _SelfieState extends State<Selfie> {
     }
   }
 
+  Future<void> _submitAllData() async {
+    if (_selfieImage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("⚠️ Please take a selfie first")),
+      );
+      return;
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    final storedData = prefs.getString('kyc_tier2_data');
+    if (storedData == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("⚠️ No saved KYC data found.")),
+      );
+      return;
+    }
+
+    final Map<String, dynamic> kycData = jsonDecode(storedData);
+    String selfieBase64 = base64Encode(await _selfieImage!.readAsBytes());
+    kycData['selfie'] = selfieBase64;
+
+    final token = await AuthService.getToken();
+    if (token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("⚠️ Please log in again.")),
+      );
+      return;
+    }
+
+    // Show loading
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(
+        child: CircularProgressIndicator(color: Color(0xFF442266)),
+      ),
+    );
+
+    try {
+      final uri = Uri.parse(
+        "https://greenwallet-6a1m.onrender.com/api/users/users/kyc/verify-tier2?token=$token",
+      );
+
+      var request = http.MultipartRequest('POST', uri);
+
+      request.fields['bvn'] = kycData['bvn'];
+      request.fields['document_type'] = kycData['document_type'];
+      request.fields['date_of_birth'] = kycData['date_of_birth'];
+      request.fields['gender'] = kycData['gender'];
+
+      // Reattach files from base64
+      final frontBytes = base64Decode(kycData['front_image']);
+      final frontFile = File('${Directory.systemTemp.path}/front.jpg');
+      await frontFile.writeAsBytes(frontBytes);
+      request.files
+          .add(await http.MultipartFile.fromPath('front', frontFile.path));
+
+      if (kycData['back_image'] != null) {
+        final backBytes = base64Decode(kycData['back_image']);
+        final backFile = File('${Directory.systemTemp.path}/back.jpg');
+        await backFile.writeAsBytes(backBytes);
+        request.files
+            .add(await http.MultipartFile.fromPath('back', backFile.path));
+      }
+
+      // Add selfie
+      final selfieFile = File('${Directory.systemTemp.path}/selfie.jpg');
+      await selfieFile.writeAsBytes(base64Decode(kycData['selfie']));
+      request.files
+          .add(await http.MultipartFile.fromPath('selfie', selfieFile.path));
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+      Navigator.pop(context);
+
+      if (response.statusCode == 200) {
+        await prefs.remove('kyc_tier2_data');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("✅ KYC Verification Successful")),
+        );
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const hompage()),
+          (route) => false,
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("❌ Verification failed: ${response.body}")),
+        );
+      }
+    } catch (e) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("⚠️ Error submitting KYC: $e")),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black),
+          icon:
+              const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -92,8 +192,8 @@ class _SelfieState extends State<Selfie> {
               alignment: Alignment.center,
               children: [
                 Container(
-                  width: 180,
-                  height: 180,
+                  width: 250,
+                  height: 250,
                   decoration: BoxDecoration(
                     color: const Color(0xFF3F2771),
                     shape: BoxShape.circle,
@@ -102,17 +202,17 @@ class _SelfieState extends State<Selfie> {
                 ClipOval(
                   child: _selfieImage == null
                       ? Image.asset(
-                    'assets/photo.png', // Placeholder image asset
-                    height: 200,
-                    width: 200,
-                    fit: BoxFit.cover,
-                  )
+                          'assets/photo.png', // Placeholder image asset
+                          height: 250,
+                          width: 250,
+                          fit: BoxFit.cover,
+                        )
                       : Image.file(
-                    _selfieImage!,
-                    height: 200,
-                    width: 200,
-                    fit: BoxFit.cover,
-                  ),
+                          _selfieImage!,
+                          height: 250,
+                          width: 250,
+                          fit: BoxFit.cover,
+                        ),
                 ),
 
                 // Camera overlay icons
@@ -141,9 +241,8 @@ class _SelfieState extends State<Selfie> {
 
             // Continue Button
             ElevatedButton(
-              onPressed: () {
-                takeSelfie();
-              },
+              onPressed: _submitAllData,
+
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
                 backgroundColor: const Color(0xFF3F2771),
@@ -152,7 +251,7 @@ class _SelfieState extends State<Selfie> {
                 ),
               ),
               child: const Text(
-                "Continue",
+                "Submit",
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 16,
@@ -161,13 +260,16 @@ class _SelfieState extends State<Selfie> {
               ),
             ),
             SizedBox(height: 5),
-            TextButton(onPressed: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => CreateCard()),
-              );
-            },
-                child: Text("Next",)
+            TextButton(
+              onPressed: () {
+                takeSelfie();
+              },
+              child: Text("Take Selfie",
+                  style: TextStyle(
+                    color: Colors.deepPurple,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  )),
             ),
             const SizedBox(height: 10),
           ],
@@ -190,7 +292,7 @@ class InstructionItem extends StatelessWidget {
       child: Row(
         children: [
           const Icon(Icons.circle, size: 8, color: Colors.deepPurple),
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
           Expanded(
             child: Text(
               text,

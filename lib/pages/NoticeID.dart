@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:green_wallet/Card/hompage.dart';
 import 'package:green_wallet/pages/Continue.dart';
 
 
@@ -18,7 +19,7 @@ class _NoticeIdState extends State<NoticeId> {
           backgroundColor: const Color(0xFF3F2771),
         leading: IconButton(
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.push(context, MaterialPageRoute(builder: (context) => hompage()));
           },
           icon: Icon(Icons.arrow_back_ios_new_rounded,
             color: Colors.white,

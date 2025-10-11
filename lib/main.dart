@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:green_wallet/provider/kyc_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:green_wallet/Card/Selfie.dart';
 import 'package:green_wallet/Splash_Screen.dart';
+import 'package:green_wallet/Card/hompage.dart';
+import 'package:green_wallet/pages/BVN_entry.dart';
 
 
 
@@ -22,8 +25,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'Green Wallet',
       debugShowCheckedModeBanner: false,
-      home: const SplashScreen(),
+      initialRoute: '/loading',
+      routes: {
+        '/loading': (context) => const SplashScreen(),
+        '/home': (context) => const hompage(),
+        '/bvn': (context) => const BvnEntry(),
+        '/selfie': (context) => const Selfie(), // 👈 your selfie page
+      },
     );
   }
 }

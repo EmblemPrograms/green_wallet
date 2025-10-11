@@ -1,5 +1,8 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:green_wallet/Card/Account_details.dart';
 import 'package:green_wallet/provider/kyc_provider.dart';
 import 'package:green_wallet/services/auth_service.dart';
@@ -13,24 +16,69 @@ class ProfileHeader extends StatefulWidget {
 
 class _ProfileHeaderState extends State<ProfileHeader> {
   String _fullName = "User Name";
+  String? _selfieUrl; // For Cloudinary or network images
+  Uint8List? _selfieBytes; // Store decoded image bytes
 
   @override
   void initState() {
     super.initState();
-    _loadFullName();
+    _loadProfileData();
   }
 
-  Future<void> _loadFullName() async {
+  Future<void> _loadProfileData() async {
     final profile = await AuthService.getUserProfile();
-    setState(() {
-      _fullName = profile["full_name"] ?? "User Name";
-    });
-  }
 
+    if (mounted) {
+      setState(() {
+        _fullName = profile["full_name"] ?? "User Name";
+
+        final selfieValue = profile["selfie"];
+        if (selfieValue != null && selfieValue.isNotEmpty) {
+          if (selfieValue.startsWith("http")) {
+            // It's a URL (Cloudinary)
+            _selfieUrl = selfieValue;
+          } else {
+            // It's likely Base64, try decoding
+            try {
+              _selfieBytes = base64Decode(selfieValue);
+            } catch (e) {
+              debugPrint("Error decoding Base64 selfie: $e");
+            }
+          }
+        }
+      });
+    }
+  }
   @override
   Widget build(BuildContext context) {
     final kycTier = context.watch<KycProvider>().kycTier;
 
+    Widget avatarWidget;
+
+    if (_selfieBytes != null) {
+      // Display Base64 selfie
+      avatarWidget = CircleAvatar(
+        radius: 24,
+        backgroundImage: MemoryImage(_selfieBytes!),
+      );
+    } else if (_selfieUrl != null) {
+      // Display cached Cloudinary image
+      avatarWidget = CircleAvatar(
+        radius: 24,
+        backgroundColor: Colors.grey[300],
+        backgroundImage: CachedNetworkImageProvider(_selfieUrl!),
+        onBackgroundImageError: (_, __) {
+          debugPrint("❌ Failed to load network selfie");
+        },
+      );
+    } else {
+      // Default placeholder
+      avatarWidget = const CircleAvatar(
+        radius: 24,
+        backgroundColor: Colors.white24,
+        child: Icon(Icons.person, color: Colors.white, size: 24),
+      );
+    }
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -44,31 +92,28 @@ class _ProfileHeaderState extends State<ProfileHeader> {
           Stack(
             alignment: Alignment.bottomRight,
             children: [
-              CircleAvatar(
-                backgroundColor: Colors.white.withOpacity(0.2),
-                radius: 24,
-                child: const Icon(Icons.person, color: Colors.white, size: 26),
-              ),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Container(
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: _getTierColor(kycTier),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    "Tier $kycTier",
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
+              avatarWidget,
+
+              // Positioned(
+              //   bottom: 0,
+              //   right: 0,
+              //   child: Container(
+              //     padding:
+              //     const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              //     decoration: BoxDecoration(
+              //       color: _getTierColor(kycTier),
+              //       borderRadius: BorderRadius.circular(12),
+              //     ),
+              //     child: Text(
+              //       "Tier $kycTier",
+              //       style: const TextStyle(
+              //         color: Colors.white,
+              //         fontSize: 10,
+              //         fontWeight: FontWeight.bold,
+              //       ),
+              //     ),
+              //   ),
+              // ),
             ],
           ),
 

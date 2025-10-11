@@ -114,6 +114,8 @@ class _homepageState extends State<homepage> {
       await AuthService.saveUserProfile(
         data['full_name'] ?? "User",
         data['email'] ?? "Unknown",
+        data['bvn'] ?? "Unknown",
+        data['selfie'] ?? "Unknown",
       );
 
       await AuthService.saveKycTier(_kycTier);
@@ -175,7 +177,7 @@ class _homepageState extends State<homepage> {
                     ),
                     child: _kycTier == "1"
                         ? _buildUpgradeToTier2()
-                        : _buildVerifyBvnSection(),
+                        : _buildTransactionSection(),
                   ),
                 ),
 
@@ -225,7 +227,7 @@ class _homepageState extends State<homepage> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
-                                    _isObscured ? "******" : "\$1,000,000",
+                                    _isObscured ? "******" : "\$0.00",
                                     semanticsLabel: "\$1,000,000",
                                     style: const TextStyle(
                                       color: Colors.white,
@@ -304,57 +306,84 @@ class _homepageState extends State<homepage> {
     );
   }
 
-// 🟣 Shown if user has NOT verified BVN (kyc_tier != 1)
-  Widget _buildVerifyBvnSection() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const SizedBox(height: 20),
-        Image.asset(
-          'assets/virtual_card_image.png',
-          height:
-              MediaQuery.of(context).size.height * 0.20, // 20% of screen height
-          fit: BoxFit.contain,
-        ),
-        const SizedBox(height: 20),
-        const Text(
-          "Verify Your BVN",
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
+// 🟣 Shown if user has NOT verified BVN (kyc_tier != 2)
+  Widget _buildTransactionSection() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
           ),
-        ),
-        const SizedBox(height: 10),
-        const Text(
-          "Instantly verify your BVN to make managing online payments easy",
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.black54,
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(height: 10,),
+          // 🔹 Header Row (Transaction History + View All)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: const [
+              Text(
+                "Transaction History",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF1A1D1F),
+                ),
+              ),
+              Text(
+                "View All",
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF6B7280),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
           ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 20),
-        ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const BvnEntry()),
-            );
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF3F2771),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(25),
+          const SizedBox(height: 40),
+
+          // 🔸 Empty State Icon & Message
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.receipt_long_rounded,
+                  size: 60,
+                  color: Colors.grey.withOpacity(0.3),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  "No transactions yet",
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Colors.black54,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  "Your recent transactions will appear here.",
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.black38,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+              ],
             ),
-            minimumSize: const Size(double.infinity, 50), // Full width
           ),
-          child: const Text(
-            "Verify BVN",
-            style: TextStyle(fontSize: 16, color: Colors.white),
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -363,7 +392,12 @@ class _homepageState extends State<homepage> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Icon(Icons.verified, color: Colors.green, size: 80),
+        Image.asset(
+          'assets/Done.png', // Replace with your image
+          width: 150, // Matches the Icon size
+          height: 150,
+          fit: BoxFit.contain,
+        ),
         const SizedBox(height: 20),
         const Text(
           "You're verified to Tier 1!",

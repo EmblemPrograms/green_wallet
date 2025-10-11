@@ -49,6 +49,8 @@ dependencies:
   cloud_firestore: ^5.6.6
   font_awesome_flutter: ^10.8.0
   url_launcher: ^6.3.1
+  rename: ^3.1.0
+  cached_network_image: ^3.4.1
 
 
 dev_dependencies:

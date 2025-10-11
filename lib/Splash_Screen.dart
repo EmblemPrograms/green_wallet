@@ -42,8 +42,8 @@ class _SplashScreenState extends State<SplashScreen> {
           Center(
             child: Image.asset(
               'assets/gw21.png', // Your logo
-              width: 120,
-              height: 80,
+              width: 200,
+              height: 150,
             ),
           ),
         ],

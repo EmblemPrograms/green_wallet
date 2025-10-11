@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:green_wallet/pages/Signin.dart';
+import 'package:green_wallet/pages/BVN_entry.dart';
 
 class CustomDialogWidget extends StatelessWidget {
   const CustomDialogWidget({super.key});
@@ -11,7 +11,7 @@ class CustomDialogWidget extends StatelessWidget {
         Navigator.of(context).pop(); // Close the dialog
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-              builder: (context) => Signin()), // Pass required parameter
+              builder: (context) => BvnEntry()), // Pass required parameter
         );
       }
     });
@@ -56,7 +56,7 @@ class CustomDialogWidget extends StatelessWidget {
             SizedBox(height: 8),
 // Subtitle
             Text(
-              "Login to enjoy our services!",
+              "Verify your BVN to gain Access!",
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.black54,

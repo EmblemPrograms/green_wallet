@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:green_wallet/profile/Account_info.dart';
 import 'package:green_wallet/profile/cardbf.dart';
@@ -8,7 +10,8 @@ import 'package:green_wallet/widgets/Navigation_bar.dart';
 import 'package:green_wallet/Card/Invoice.dart';
 import 'package:green_wallet/Card/VCard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'dart:typed_data';
+import '../services/auth_service.dart';
 import 'hompage.dart';
 
 class ProfileP extends StatefulWidget {
@@ -57,12 +60,32 @@ class Profile extends StatefulWidget {
 class _ProfileState extends State<Profile> {
   String _fullName = "Loading..."; // ✅ Declare _fullName
 
+  Uint8List? _selfieBytes;
+  String? _selfieUrl;
+
   @override
   void initState() {
     super.initState();
     _loadUserName();
+    _loadSelfie(); // 👈 add this
   }
 
+  Future<void> _loadSelfie() async {
+    final profile = await AuthService.getUserProfile();
+
+    final selfieValue = profile["selfie"];
+    if (selfieValue != null && selfieValue.isNotEmpty) {
+      if (selfieValue.startsWith("http")) {
+        setState(() => _selfieUrl = selfieValue);
+      } else {
+        try {
+          setState(() => _selfieBytes = base64Decode(selfieValue));
+        } catch (e) {
+          debugPrint("Error decoding selfie: $e");
+        }
+      }
+    }
+  }
   Future<void> _loadUserName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -194,6 +217,24 @@ class _ProfileState extends State<Profile> {
   }
 
   Widget _buildHeader() {
+    Widget avatarWidget;
+
+    if (_selfieBytes != null) {
+      avatarWidget = CircleAvatar(
+        radius: 40,
+        backgroundImage: MemoryImage(_selfieBytes!),
+      );
+    } else if (_selfieUrl != null) {
+      avatarWidget = CircleAvatar(
+        radius: 40,
+        backgroundImage: NetworkImage(_selfieUrl!),
+      );
+    } else {
+      avatarWidget = const CircleAvatar(
+        radius: 40,
+        backgroundImage: AssetImage("assets/photo.png"),
+      );
+    }
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.only(top: 50, bottom: 20),
@@ -202,10 +243,7 @@ class _ProfileState extends State<Profile> {
       ),
       child: Column(
         children: [
-          const CircleAvatar(
-            backgroundImage: AssetImage("assets/photo.png"),
-            radius: 30,
-          ),
+          avatarWidget, // 👈 dynamic image here
           const SizedBox(height: 8),
           Text(
             _fullName,

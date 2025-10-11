@@ -113,6 +113,8 @@ class _SigninState extends State<Signin> {
         await AuthService.saveUserProfile(
           data['full_name'] ?? "User",
           data['email'] ?? "Unknown",
+          data['bvn'] ?? "Unknown",
+          data['selfie'] ?? "Unknown",
         );
 
         // 🟣 Save KYC tier (added)

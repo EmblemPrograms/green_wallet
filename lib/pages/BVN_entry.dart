@@ -1,8 +1,10 @@
 import 'dart:convert';
-import '../services/auth_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
-import 'package:green_wallet/Card/hompage.dart';
 import 'package:http/http.dart' as http;
+
+import '../widgets/textborder.dart';
+import 'Signin.dart';
 
 class BvnEntry extends StatefulWidget {
   const BvnEntry({super.key});
@@ -14,9 +16,6 @@ class BvnEntry extends StatefulWidget {
 class _BvnEntryState extends State<BvnEntry> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _bvnController = TextEditingController();
-  final TextEditingController _dateController = TextEditingController();
-
-  String _selectedGender = "Male";
   bool _isLoading = false;
   bool _isButtonEnabled = false;
 
@@ -28,21 +27,19 @@ class _BvnEntryState extends State<BvnEntry> {
 
   void _validateForm() {
     final bvnValid = _bvnController.text.length == 11;
-    final dateValid = _dateController.text.isNotEmpty;
-    final genderValid = _selectedGender.isNotEmpty;
 
     setState(() {
-      _isButtonEnabled = bvnValid && dateValid && genderValid;
+      _isButtonEnabled = bvnValid;
     });
   }
 
   Future<void> _verifyBVN() async {
-    if (!_formKey.currentState!.validate()) return;
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString("auth_token");
 
-    final token = await AuthService.getToken();
     if (token == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("⚠️ Logout and Login Again.")),
+        const SnackBar(content: Text("Authentication error. ")),
       );
       return;
     }
@@ -59,8 +56,6 @@ class _BvnEntryState extends State<BvnEntry> {
         headers: {"Content-Type": "application/x-www-form-urlencoded"},
         body: {
           "bvn": _bvnController.text.trim(),
-          "date_of_birth": _dateController.text.trim(),
-          "gender": _selectedGender,
         },
       );
 
@@ -84,7 +79,7 @@ class _BvnEntryState extends State<BvnEntry> {
         Future.delayed(const Duration(seconds: 2), () {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (_) => const hompage()),
+            MaterialPageRoute(builder: (_) => const Signin()),
           );
         });
       } else {
@@ -103,7 +98,6 @@ class _BvnEntryState extends State<BvnEntry> {
   @override
   void dispose() {
     _bvnController.dispose();
-    _dateController.dispose();
     super.dispose();
   }
 
@@ -165,13 +159,11 @@ class _BvnEntryState extends State<BvnEntry> {
                     TextFormField(
                       controller: _bvnController,
                       decoration: InputDecoration(
-                        hintText: "Enter your BVN",
-                        filled: true,
-                        fillColor: const Color(0xFFF5F5F5),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide.none,
                         ),
+                        hintText: 'Enter your BVN',
+                        enabledBorder: Bcolor.enabledBorder,
                         counterText: "",
                       ),
                       keyboardType: TextInputType.number,
@@ -188,93 +180,16 @@ class _BvnEntryState extends State<BvnEntry> {
                     ),
                     const SizedBox(height: 10),
 
-                    /// Date of Birth
-                    const Text(
-                      "Date of birth",
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                    TextFormField(
-                      controller: _dateController,
-                      readOnly: true,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please select a date of birth';
-                        }
-                        return null;
-                      },
-                      onTap: () async {
-                        FocusScope.of(context).unfocus();
-                        DateTime? selectedDate = await showDatePicker(
-                          context: context,
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime(1900),
-                          lastDate: DateTime.now(),
-                        );
-                        if (selectedDate != null) {
-                          setState(() {
-                            _dateController.text =
-                            "${selectedDate.toLocal()}".split(' ')[0];
-                          });
-                          _validateForm();
-                        }
-                      },
-                      decoration: InputDecoration(
-                        hintText: "Select your date of birth",
-                        filled: true,
-                        fillColor: const Color(0xFFF5F5F5),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    /// Gender
-                    const Text(
-                      "Gender",
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                    DropdownButtonFormField<String>(
-                      value: _selectedGender,
-                      onChanged: (value) {
-                        _selectedGender = value!;
-                        _validateForm();
-                      },
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: const Color(0xFFF5F5F5),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                      items: ['Male', 'Female']
-                          .map((gender) => DropdownMenuItem<String>(
-                        value: gender,
-                        child: Text(gender),
-                      ))
-                          .toList(),
-                    ),
-                    const SizedBox(height: 200),
+                    const SizedBox(height: 380),
 
                     /// Verify Button
                     ElevatedButton(
                       onPressed: _isButtonEnabled
                           ? () {
-                        if (_formKey.currentState!.validate()) {
-                          _verifyBVN(); // ✅ actually verify with backend
-                        }
-                      }
+                              if (_formKey.currentState!.validate()) {
+                                _verifyBVN(); // ✅ actually verify with backend
+                              }
+                            }
                           : null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _isButtonEnabled
@@ -323,7 +238,7 @@ class CustomDialogWidget1 extends StatelessWidget {
       if (context.mounted) {
         Navigator.of(context).pop();
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const hompage()),
+          MaterialPageRoute(builder: (context) => const Signin()),
         );
       }
     });
@@ -336,7 +251,8 @@ class CustomDialogWidget1 extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
           boxShadow: const [
-            BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 4)),
+            BoxShadow(
+                color: Colors.black26, blurRadius: 10, offset: Offset(0, 4)),
           ],
         ),
         child: Column(
@@ -352,13 +268,21 @@ class CustomDialogWidget1 extends StatelessWidget {
                   color: Colors.black87),
               textAlign: TextAlign.center,
             ),
+            const SizedBox(height: 5),
+            const Text(
+              "Sign in to Access Your Account",
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87),
+              textAlign: TextAlign.center,
+            ),
           ],
         ),
       ),
     );
   }
 }
-
 
 String? filltextbox(String? text) {
   if (text == null || text.trim().isEmpty) {

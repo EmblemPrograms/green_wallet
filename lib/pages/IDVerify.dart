@@ -1,7 +1,13 @@
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:green_wallet/Card/hompage.dart';
 import 'package:image_picker/image_picker.dart';
+
+import '../services/auth_service.dart';
+import '../widgets/textborder.dart';
 
 class IDVerify extends StatefulWidget {
   const IDVerify({super.key});
@@ -23,12 +29,28 @@ class _IDVerifyState extends State<IDVerify> {
   final picker = ImagePicker();
 
   final List<String> _documentTypes = [
-    "National ID",
+    "NIN Slip",
+    "National ID Card",
     "Voter’s Card",
     "Driver’s License",
     "International Passport",
   ];
+  @override
+  void initState() {
+    super.initState();
+    _loadBVN();
+  }
 
+  Future<void> _loadBVN() async {
+    final profile = await AuthService.getUserProfile();
+    final bvn = profile["bvn"];
+
+    if (bvn != null && mounted) {
+      setState(() {
+        _bvnController.text = bvn;
+      });
+    }
+  }
   Future<void> _pickImage(bool isFront) async {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
@@ -42,28 +64,51 @@ class _IDVerifyState extends State<IDVerify> {
     }
   }
 
-  void _submitForm() {
+  Future<void> _saveLocalAndProceed() async {
     if (!_formKey.currentState!.validate()) return;
+    if (_frontImage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("⚠️ Please upload the front document image")),
+      );
+      return;
+    }
 
-    final Map<String, dynamic> payload = {
-      "bvn": _bvnController.text.trim(),
-      "document_type": _selectedDocumentType,
-      "front": _frontImage?.path,
-      "back": _backImage?.path,
-      "date_of_birth": _dateController.text.trim().isEmpty
-          ? null
-          : _dateController.text.trim(),
-      "gender": _selectedGender,
-    };
+    try {
+      // Convert image(s) to Base64
+      String frontBase64 = base64Encode(await _frontImage!.readAsBytes());
+      String? backBase64 = _backImage != null
+          ? base64Encode(await _backImage!.readAsBytes())
+          : null;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("✅ BVN Data Ready: ${payload.toString()}")),
-    );
+      // Prepare local data
+      Map<String, dynamic> kycData = {
+        'bvn': _bvnController.text.trim(),
+        'document_type': _selectedDocumentType ?? '',
+        'date_of_birth': _dateController.text.trim().isEmpty
+            ? '2000-01-01'
+            : _dateController.text.trim(),
+        'gender': _selectedGender.toLowerCase(),
+        'front_image': frontBase64,
+        'back_image': backBase64,
+      };
 
-    // TODO: Proceed to next page or make API call
-    // Example navigation:
-     Navigator.push(context, MaterialPageRoute(builder: (_) => const hompage()));
+      // Save locally
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('kyc_tier2_data', jsonEncode(kycData));
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("✅ Data saved. Proceed to take selfie.")),
+      );
+
+      // Navigate to selfie page
+      Navigator.pushNamed(context, '/selfie');
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("⚠️ Error saving data: $e")),
+      );
+    }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -108,15 +153,15 @@ class _IDVerifyState extends State<IDVerify> {
                 ),
                 const SizedBox(height: 5),
                 TextFormField(
+                  style: const TextStyle(color: Colors.grey),
                   controller: _bvnController,
+                  readOnly: true,
                   decoration: InputDecoration(
-                    hintText: "Enter your BVN",
-                    filled: true,
-                    fillColor: const Color(0xFFF5F5F5),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide.none,
                     ),
+                    hintText: 'Enter your BVN',
+                    enabledBorder: Bcolor.enabledBorder,
                     counterText: "",
                   ),
                   keyboardType: TextInputType.number,
@@ -132,18 +177,25 @@ class _IDVerifyState extends State<IDVerify> {
                 ),
 
                 const SizedBox(height: 20),
-
+            Align(alignment: Alignment.centerLeft,
+              child: Text(
+                "Document Type",
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+                        ),
+            ),
+          const SizedBox(height: 5),
                 // Document Type
                 DropdownButtonFormField<String>(
                   value: _selectedDocumentType,
                   decoration: InputDecoration(
-                    labelText: "Document Type",
-                    filled: true,
-                    fillColor: const Color(0xFFF5F5F5),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide.none,
                     ),
+                    hintText: 'Document Type',
+                    enabledBorder: Bcolor.enabledBorder,
                   ),
                   items: _documentTypes
                       .map((String type) => DropdownMenuItem(
@@ -159,7 +211,6 @@ class _IDVerifyState extends State<IDVerify> {
                 ),
 
                 const SizedBox(height: 20),
-
                 // Front Image Picker
                 _buildImagePicker(
                   label: "Front Document *",
@@ -192,14 +243,14 @@ class _IDVerifyState extends State<IDVerify> {
                   controller: _dateController,
                   readOnly: true,
                   decoration: InputDecoration(
-                    hintText: "Select date of birth",
-                    filled: true,
-                    fillColor: const Color(0xFFF5F5F5),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide.none,
                     ),
-                    suffixIcon: const Icon(Icons.calendar_today, color: Colors.grey),
+                    hintText: 'Select your date of birth',
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+                    ),
                   ),
                   onTap: () async {
                     FocusScope.of(context).requestFocus(FocusNode()); // Prevent keyboard
@@ -243,15 +294,13 @@ class _IDVerifyState extends State<IDVerify> {
                     });
                   },
                   decoration: InputDecoration(
-                    labelText: "Gender",
-                    filled: true,
-                    fillColor: const Color(0xFFF5F5F5),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide.none,
                     ),
+                    enabledBorder: Bcolor.enabledBorder,
                   ),
-                  items: ['Male', 'Female']
+                  hint: const Text('Select Gender'),
+                  items: ['Male', 'Female', 'Other']
                       .map((gender) => DropdownMenuItem<String>(
                     value: gender,
                     child: Text(gender),
@@ -270,7 +319,7 @@ class _IDVerifyState extends State<IDVerify> {
                     ),
                     minimumSize: const Size(double.infinity, 50),
                   ),
-                  onPressed: _submitForm,
+                  onPressed: _saveLocalAndProceed,
                   child: const Text(
                     "Continue",
                     style: TextStyle(
@@ -310,9 +359,8 @@ class _IDVerifyState extends State<IDVerify> {
             width: double.infinity,
             height: 150,
             decoration: BoxDecoration(
-              color: const Color(0xFFF5F5F5),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.grey.shade400),
+              border: Border.all(color: Color(0xFF3F2771)),
             ),
             child: file == null
                 ? const Center(
