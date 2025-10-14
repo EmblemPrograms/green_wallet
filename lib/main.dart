@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:green_wallet/provider/kyc_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:green_wallet/Card/Selfie.dart';
+import 'package:green_wallet/pages/Selfie.dart';
 import 'package:green_wallet/Splash_Screen.dart';
 import 'package:green_wallet/Card/hompage.dart';
 import 'package:green_wallet/pages/BVN_entry.dart';
@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
         '/loading': (context) => const SplashScreen(),
         '/home': (context) => const hompage(),
         '/bvn': (context) => const BvnEntry(),
-        '/selfie': (context) => const Selfie(), // 👈 your selfie page
+        '/selfie': (context) => const Selfie(),
       },
     );
   }

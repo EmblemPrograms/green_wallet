@@ -244,12 +244,6 @@ class _SelectPinState extends State<SelectPin> {
             // "Next" Button
             ElevatedButton(
               onPressed: _isLoading ? null : _savePin, // ✅ Call API function
-              // onPressed: isButtonActive
-              //     ? () async {
-              //   // Handle PIN submission
-              //   final pin = _controllers.map((c) => c.text).join();
-              //   print("Entered PIN: $pin");
-
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
                 backgroundColor:

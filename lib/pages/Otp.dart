@@ -328,32 +328,41 @@ class _OtpState extends State<Otp> {
     return SizedBox(
       width: 50,
       height: 60,
-      child: TextFormField(
-        controller: _otpControllers[index],
+      child: KeyboardListener(
         focusNode: _focusNodes[index],
-        textAlign: TextAlign.center,
-        style: const TextStyle(fontSize: 24),
-        keyboardType: TextInputType.number,
-        inputFormatters: [
-          LengthLimitingTextInputFormatter(1),
-          FilteringTextInputFormatter.digitsOnly,
-        ],
-        onChanged: (value) {
-          if (value.isNotEmpty && index < 3) {
-            FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
+        onKeyEvent: (KeyEvent event) {
+          // Only handle key down events
+          if (event is KeyDownEvent) {
+            if (event.logicalKey == LogicalKeyboardKey.backspace) {
+              // If current box is empty and not the first, move back
+              if (_otpControllers[index].text.isEmpty && index > 0) {
+                _focusNodes[index - 1].requestFocus();
+                _otpControllers[index - 1].clear();
+              }
+            }
           }
         },
-        onEditingComplete: () {
-          if (index > 0 && _otpControllers[index].text.isEmpty) {
-            FocusScope.of(context).requestFocus(_focusNodes[index - 1]);
-          }
-        },
-        decoration: InputDecoration(
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
+        child: TextFormField(
+          controller: _otpControllers[index],
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 24),
+          keyboardType: TextInputType.number,
+          inputFormatters: [
+            LengthLimitingTextInputFormatter(1),
+            FilteringTextInputFormatter.digitsOnly,
+          ],
+          onChanged: (value) {
+            if (value.isNotEmpty && index < 3) {
+              FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
+            }
+          },
+          decoration: InputDecoration(
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
         ),
       ),
     );
   }
-}
+  }

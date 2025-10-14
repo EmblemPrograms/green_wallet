@@ -1,3 +1,5 @@
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:green_wallet/pages/Signin.dart';
 import 'package:flutter/material.dart';
 import 'package:gif_view/gif_view.dart';
 import 'package:green_wallet/pages/Startup.dart';
@@ -13,16 +15,29 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-
-    // Navigate to the next screen after 5 seconds
-    Future.delayed(Duration(seconds: 7), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => Startup()),
-      );
-    });
+    _navigateNext();
   }
 
+  Future<void> _navigateNext() async {
+    // Show the splash for 5–7 seconds so the GIF plays fully
+    await Future.delayed(const Duration(seconds: 7));
+
+    final prefs = await SharedPreferences.getInstance();
+    final isFirstLaunch = prefs.getBool('isFirstLaunch') ?? true;
+
+    if (isFirstLaunch) {
+      await prefs.setBool('isFirstLaunch', false);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const Startup()),
+      );
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const Signin()),
+      );
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

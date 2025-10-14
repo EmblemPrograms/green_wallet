@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:green_wallet/Card/Selfie.dart';
+import 'package:green_wallet/pages/Selfie.dart';
 
 class ValidateCard extends StatefulWidget {
   const ValidateCard({super.key});

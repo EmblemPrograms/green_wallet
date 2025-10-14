@@ -33,6 +33,7 @@ class _StartupState extends State<Startup> {
   final CarouselController carouselController = CarouselController();
   int currentIndex = 0;
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

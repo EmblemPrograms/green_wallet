@@ -125,6 +125,9 @@ class _SelfieState extends State<Selfie> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("✅ KYC Verification Successful")),
         );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Create Your Pin")),
+        );
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (_) => const hompage()),

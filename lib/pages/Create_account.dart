@@ -70,13 +70,13 @@ class _CreateAccountState extends State<CreateAccount> {
   Future<void> _registerUser() async {
     final String userEmail = _emailController.text.trim();
 
-    // Extra email check before registering
+    // Validate email before sending request
     final emailError = validateEmail(userEmail);
     if (emailError != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("❌ $emailError")),
       );
-      return; // stop here if invalid
+      return;
     }
 
     final Map<String, dynamic> userData = {
@@ -90,30 +90,31 @@ class _CreateAccountState extends State<CreateAccount> {
     try {
       setState(() => _isLoading = true);
 
-      final response = await http.post(
+      // Send request asynchronously, but don't wait for confirmation to navigate
+      http.post(
         Uri.parse(_apiUrl),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(userData),
-      );
+      ).then((response) {
+        // Optional: Log or handle any errors that come later
+        if (response.statusCode != 200) {
+          debugPrint("⚠️ Server responded with ${response.statusCode}");
+          _handleErrorResponse(response);
+        }
+      }).catchError((error) {
+        debugPrint("❌ Registration request failed: $error");
+      });
 
+      // Immediately stop loading and navigate
       setState(() => _isLoading = false);
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data['message'] ?? "Registration Successful")),
-        );
-
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => Otp(email: userEmail),
-          ),
-        );
-      } else {
-        _handleErrorResponse(response);
-      }
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Otp(email: userEmail),
+        ),
+      );
     } catch (error) {
       setState(() => _isLoading = false);
       debugPrint("❌ Registration error: $error");
