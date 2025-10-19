@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:green_wallet/widgets/Navigation_bar.dart';
 import 'package:green_wallet/Card/Invoice.dart';
-import 'package:green_wallet/Card/VCard.dart';
+import 'package:green_wallet/Card/NCard.dart';
 import 'package:green_wallet/Card/Profile.dart';
 import 'package:green_wallet/Card/hompage.dart';
 
@@ -20,7 +20,7 @@ class _CardsBeneficiariesPageState extends State<CardsBeneficiariesPage> {
   // List of screens (widgets) for navigation
   final List<Widget> _pages = [
     const homepage(),
-    const VCard(),
+    const NCard(),
     const Invoice(),
     const Profile(),
     const Cardse(),

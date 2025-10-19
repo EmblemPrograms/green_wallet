@@ -4,7 +4,7 @@ import 'package:green_wallet/widgets/Navigation_bar.dart';
 import 'package:green_wallet/InoviceCreation/Create_invoice.dart';
 
 import 'Profile.dart';
-import 'VCard.dart';
+import 'NCard.dart';
 
 class InvoiceP extends StatefulWidget {
   const InvoiceP({super.key});
@@ -19,7 +19,7 @@ class _InvoicePState extends State<InvoiceP> {
   // List of screens (widgets) for navigation
   final List<Widget> _pages = [
     const homepage(),
-    const VCard(),
+    const NCard(),
     const Invoice(),
     const Profile(),
   ];

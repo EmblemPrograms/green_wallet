@@ -1,28 +1,44 @@
+import 'package:http/http.dart' as http;
+import 'package:green_wallet/services/auth_service.dart';
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:green_wallet/Card/Create_card.dart';
-import 'package:green_wallet/Card/NCard.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class SelectPin extends StatefulWidget {
-  const SelectPin({super.key});
+import 'NCard.dart';
+
+class SetPin extends StatefulWidget {
+  const SetPin({Key? key}) : super(key: key);
 
   @override
-  State<SelectPin> createState() => _SelectPinState();
+  State<SetPin> createState() => _SetPinState();
 }
 
-class _SelectPinState extends State<SelectPin> {
+class _SetPinState extends State<SetPin> {
+  String _fullName = "Loading..."; // ✅ Declare _fullName
   final List<TextEditingController> _controllers = List.generate(4, (_) => TextEditingController());
-  final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
   bool isButtonActive = false;
 
   void _checkPinComplete() {
     setState(() {
-      isButtonActive = _controllers.every((controller) => controller.text.isNotEmpty);
+      isButtonActive =
+          _controllers.every((controller) => controller.text.isNotEmpty);
+    });
+
+    if (isButtonActive) {
+      final pin = _controllers.map((c) => c.text).join();
+    }
+  }
+  Future<void> _loadUserName() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _fullName =
+          prefs.getString("full_name") ?? "User"; // ✅ Load name dynamically
     });
   }
-
   @override
   void initState() {
     super.initState();
+    _loadUserName();
     for (var controller in _controllers) {
       controller.addListener(_checkPinComplete);
     }
@@ -33,9 +49,6 @@ class _SelectPinState extends State<SelectPin> {
     for (var controller in _controllers) {
       controller.dispose();
     }
-    for (var node in _focusNodes) {
-      node.dispose();
-    }
     super.dispose();
   }
 
@@ -45,7 +58,6 @@ class _SelectPinState extends State<SelectPin> {
         for (int i = 3; i >= 0; i--) {
           if (_controllers[i].text.isNotEmpty) {
             _controllers[i].clear();
-            _focusNodes[i].requestFocus();
             break;
           }
         }
@@ -53,12 +65,47 @@ class _SelectPinState extends State<SelectPin> {
         for (int i = 0; i < 4; i++) {
           if (_controllers[i].text.isEmpty) {
             _controllers[i].text = value;
-            if (i < 3) _focusNodes[i + 1].requestFocus();
             break;
           }
         }
       }
     });
+  }
+
+  Future<void> _handlePinSubmission() async {
+    // Show loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Dialog(
+        backgroundColor: Colors.transparent,
+        child: Center(
+          child: CircularProgressIndicator(
+            color: Color(0xFF3F2771),
+          ),
+        ),
+      ),
+    );
+
+    // Simulate network delay and process
+    await Future.delayed(const Duration(seconds: 2));
+
+    // Save card status
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('has_card', true);
+    await prefs.setString('_fullname', _fullName); // optional: save name
+
+    // Close the loading dialog
+    if (context.mounted) Navigator.of(context).pop();
+
+    // Show success dialog
+    if (context.mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const CustomDialogWidget(),
+      );
+    }
   }
 
   @override
@@ -67,12 +114,7 @@ class _SelectPinState extends State<SelectPin> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => CreateCard()),
-            );
-          },
+          onPressed: () => Navigator.of(context).pop(),
         ),
         elevation: 0,
         backgroundColor: Colors.white,
@@ -116,8 +158,7 @@ class _SelectPinState extends State<SelectPin> {
                   child: TextField(
                     obscureText: true,
                     controller: _controllers[index],
-                    focusNode: _focusNodes[index],
-                    textAlign: TextAlign.center,
+                    textAlign: TextAlign.center, // Prevent manual typing
                     maxLength: 1,
                     readOnly: true, // Prevent manual typing
                     style: const TextStyle(fontSize: 24),
@@ -140,38 +181,7 @@ class _SelectPinState extends State<SelectPin> {
 
             // "Next" Button
             ElevatedButton(
-              onPressed: isButtonActive
-                  ? () async {
-                // Handle PIN submission
-                final pin = _controllers.map((c) => c.text).join();
-                print("Entered PIN: $pin");
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (context) {
-                    return Dialog(
-                      backgroundColor: Colors.transparent,
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: Color(0xFF3F2771),
-                        ),
-                      ),
-                    );
-                  },
-                );
-
-                // Simulate loading
-                await Future.delayed(Duration(seconds: 2));
-                Navigator.of(context).pop(); // Close the loading dialog
-
-                // Show CustomDialogWidget
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (context) => CustomDialogWidget(),
-                );
-              }
-                  : null,
+              onPressed: isButtonActive ? _handlePinSubmission : null,
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
                 backgroundColor: isButtonActive
@@ -182,7 +192,7 @@ class _SelectPinState extends State<SelectPin> {
                 ),
               ),
               child: const Text(
-                "Next",
+                "Create Card Now",
                 style: TextStyle(fontSize: 16, color: Colors.white),
               ),
             ),
@@ -247,16 +257,16 @@ class _SelectPinState extends State<SelectPin> {
 }
 
 class CustomDialogWidget extends StatelessWidget {
-  const CustomDialogWidget({super.key});
+  const CustomDialogWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    Future.delayed(Duration(seconds: 3), () {
+    Future.delayed(const Duration(seconds: 3), () {
       if (context.mounted) {
         Navigator.of(context).pop(); // Close the dialog
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => CardP()),
+          MaterialPageRoute(builder: (context) => const CardP()),
         );
       }
     });
@@ -265,12 +275,12 @@ class CustomDialogWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(20), // Ensure rounded corners
       ),
       child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 0),
-        padding: EdgeInsets.all(20),
+        margin: const EdgeInsets.symmetric(horizontal: 0),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
               color: Colors.black26,
               blurRadius: 10,
@@ -287,9 +297,9 @@ class CustomDialogWidget extends StatelessWidget {
               height: 150,
               width: 150,
             ),
-            SizedBox(height: 0),
+            const SizedBox(height: 0),
             // Title
-            Text(
+            const Text(
               "Card Created Successfully",
               style: TextStyle(
                 fontSize: 18,
@@ -298,9 +308,9 @@ class CustomDialogWidget extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             // Subtitle
-            Text(
+            const Text(
               "Please keep it safe and do not share it with anyone",
               style: TextStyle(
                 fontSize: 14,
@@ -308,7 +318,7 @@ class CustomDialogWidget extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
           ],
         ),
       ),

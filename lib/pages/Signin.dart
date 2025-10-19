@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'package:green_wallet/Card/hompage.dart';
 
 import '../services/auth_service.dart';
+import 'forgetPass.dart';
 
 class Signin extends StatefulWidget {
   const Signin({super.key});
@@ -78,7 +79,6 @@ class _SigninState extends State<Signin> {
             MaterialPageRoute(builder: (context) => hompage()),
           );
         });
-
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Login failed: ${response.body}")),
@@ -94,7 +94,6 @@ class _SigninState extends State<Signin> {
       );
     }
   }
-
 
   Future<void> _fetchUserProfile(String token) async {
     final url =
@@ -121,17 +120,17 @@ class _SigninState extends State<Signin> {
         await AuthService.saveKycTier(
           data['kyc_tier']?.toString() ?? "0", // Default "0" if not verified
         );
-
-        debugPrint("✅ Profile & KYC saved successfully");
       } else {
-        debugPrint("❌ Profile fetch failed: ${response.body}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Server error, try again!")),
+        );
       }
     } catch (error) {
-      debugPrint("⚠️ Error fetching user profile: $error");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Contact Support System!")),
+      );
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -279,7 +278,12 @@ class _SigninState extends State<Signin> {
                     ],
                   ),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => ResetPassword()),
+                      );
+                    },
                     child: const Text(
                       "Forgot Password ?",
                       style: TextStyle(
@@ -350,15 +354,6 @@ class CustomDialogWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Future.delayed(Duration(seconds: 3), () {
-      if (context.mounted) {
-        Navigator.of(context).pop(); // Close the dialog
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-              builder: (context) => hompage()), // Pass required parameter
-        );
-      }
-    });
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20), // Ensure rounded corners

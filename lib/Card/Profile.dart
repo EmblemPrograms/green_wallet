@@ -8,7 +8,7 @@ import 'package:green_wallet/profile/noti.dart';
 import 'package:green_wallet/profile/security.dart';
 import 'package:green_wallet/widgets/Navigation_bar.dart';
 import 'package:green_wallet/Card/Invoice.dart';
-import 'package:green_wallet/Card/VCard.dart';
+import 'package:green_wallet/Card/NCard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:typed_data';
 import '../services/auth_service.dart';
@@ -27,7 +27,7 @@ class _ProfilePState extends State<ProfileP> {
   // List of screens (widgets) for navigation
   final List<Widget> _pages = [
     const homepage(),
-    const VCard(),
+    const NCard(),
     const Invoice(),
     const Profile(),
   ];

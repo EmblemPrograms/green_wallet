@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../services/auth_service.dart';
 import '../Card/hompage.dart';
+import 'Setup_pin.dart';
 
 class Selfie extends StatefulWidget {
   const Selfie({super.key});
@@ -130,7 +131,7 @@ class _SelfieState extends State<Selfie> {
         );
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (_) => const hompage()),
+          MaterialPageRoute(builder: (_) => const SetupPin()),
           (route) => false,
         );
       } else {

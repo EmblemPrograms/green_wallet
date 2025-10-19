@@ -5,9 +5,8 @@ import 'package:green_wallet/ActionB/MoreP.dart';
 import 'package:green_wallet/ActionB/Send.dart';
 import 'package:green_wallet/ActionB/TopUp.dart';
 import 'package:green_wallet/Card/Invoice.dart';
-import 'package:green_wallet/Card/VCard.dart';
+import 'package:green_wallet/Card/NCard.dart';
 import 'package:green_wallet/Card/Profile.dart';
-import 'package:green_wallet/pages/BVN_entry.dart';
 import 'package:green_wallet/services/auth_service.dart';
 import 'package:green_wallet/widgets/Navigation_bar.dart';
 import 'package:green_wallet/widgets/profileheader.dart';
@@ -29,7 +28,7 @@ class _hompageState extends State<hompage> {
   // List of screens (widgets) for navigation
   final List<Widget> _pages = [
     const homepage(),
-    const VCard(),
+    const NCard(),
     const Invoice(),
     const Profile(),
   ];
@@ -154,13 +153,13 @@ class _homepageState extends State<homepage> {
               children: [
                 // Purple Background
                 Container(
-                  height: MediaQuery.of(context).size.height * 0.771,
+                  height: MediaQuery.of(context).size.height * 0.78,
                   color: const Color(0xFF3F2771), // Purple background
                 ),
 
                 // White Card Section
                 Positioned(
-                  top: 158,
+                  top: 156,
                   left: 0,
                   right: 0,
                   child: Container(

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:green_wallet/pages/Startup.dart';
 import 'package:http/http.dart' as http;
 import 'package:green_wallet/pages/AccountSetup.dart';
 import 'package:green_wallet/widgets/textborder.dart';
@@ -38,6 +37,7 @@ class _OtpState extends State<Otp> {
   @override
   void initState() {
     super.initState();
+    sendOtp(); // Send OTP immediately when screen loads
     startTimer();
     for (var controller in _otpControllers) {
       controller.addListener(_checkOTPComplete);
@@ -68,28 +68,47 @@ class _OtpState extends State<Otp> {
     });
   }
 
-  void _onKeyPress(String value) {
-    setState(() {
-      if (value == 'backspace') {
-        for (int i = 3; i >= 0; i--) {
-          if (_otpControllers[i].text.isNotEmpty) {
-            _otpControllers[i].clear();
-            _focusNodes[i].requestFocus();
-            break;
-          }
-        }
-      } else {
-        for (int i = 0; i < 4; i++) {
-          if (_otpControllers[i].text.isEmpty) {
-            _otpControllers[i].text = value;
-            if (i < 3) _focusNodes[i + 1].requestFocus();
-            break;
-          }
-        }
-      }
-    });
-  }
+  Future<void> sendOtp() async {
+    final String apiUrl = "https://greenwallet-6a1m.onrender.com/api/users/send-otp";
 
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'email': widget.email}),
+      );
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['message'] ?? "OTP sent successfully")),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['message'] ?? "Failed to send OTP")),
+        );
+      }
+    } catch (error) {
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Network error while sending OTP.")),
+      );
+    }
+  }
   Future<void> verifyOTP() async {
     final String enteredOTP = _otpControllers.map((c) => c.text).join();
 
@@ -101,7 +120,7 @@ class _OtpState extends State<Otp> {
     }
 
     final String apiUrl =
-        "https://greenwallet-6a1m.onrender.com/api/users/verify-otp"
+        "https://greenwallet-6a1m.onrender.com/api/users/verify-email"
         "?email=${widget.email}&otp=$enteredOTP";
 
     try {
@@ -169,10 +188,6 @@ class _OtpState extends State<Otp> {
         leading: IconButton(
           onPressed: () {
             Navigator.pop(context);
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => Startup()),
-            );
           },
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
         ),
@@ -301,6 +316,7 @@ class _OtpState extends State<Otp> {
                                   secondsRemaining = 59;
                                   startTimer();
                                 });
+                                sendOtp(); //resend otp
                               }
                             : null,
                         child: Text(
@@ -328,38 +344,30 @@ class _OtpState extends State<Otp> {
     return SizedBox(
       width: 50,
       height: 60,
-      child: KeyboardListener(
+      child: TextFormField(
+        controller: _otpControllers[index],
         focusNode: _focusNodes[index],
-        onKeyEvent: (KeyEvent event) {
-          // Only handle key down events
-          if (event is KeyDownEvent) {
-            if (event.logicalKey == LogicalKeyboardKey.backspace) {
-              // If current box is empty and not the first, move back
-              if (_otpControllers[index].text.isEmpty && index > 0) {
-                _focusNodes[index - 1].requestFocus();
-                _otpControllers[index - 1].clear();
-              }
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 24),
+        keyboardType: TextInputType.number,
+        inputFormatters: [
+          LengthLimitingTextInputFormatter(1),
+          FilteringTextInputFormatter.digitsOnly,
+        ],
+        onChanged: (value) {
+          if (value.isEmpty) {
+            if (index > 0) {
+              FocusScope.of(context).requestFocus(_focusNodes[index - 1]);
             }
-          }
-        },
-        child: TextFormField(
-          controller: _otpControllers[index],
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 24),
-          keyboardType: TextInputType.number,
-          inputFormatters: [
-            LengthLimitingTextInputFormatter(1),
-            FilteringTextInputFormatter.digitsOnly,
-          ],
-          onChanged: (value) {
+          } else {
             if (value.isNotEmpty && index < 3) {
               FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
             }
-          },
-          decoration: InputDecoration(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+          }
+        },
+        decoration: InputDecoration(
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
           ),
         ),
       ),
