@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../Card/hompage.dart';
+import '../Card/homepage.dart';
 
 class ReviewInt extends StatefulWidget {
   const ReviewInt({super.key});
@@ -150,7 +150,7 @@ class CustomDialogWidget extends StatelessWidget {
         Navigator.of(context).pop(); // Close the dialog
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => hompage()),
+          MaterialPageRoute(builder: (context) => HomeContainer()),
         );
       }
     });

@@ -1,9 +1,9 @@
-import 'package:http/http.dart' as http;
-import 'package:green_wallet/services/auth_service.dart';
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:http/http.dart' as http;
+import '../services/auth_service.dart';
 import 'NCard.dart';
 
 class SetPin extends StatefulWidget {
@@ -14,7 +14,7 @@ class SetPin extends StatefulWidget {
 }
 
 class _SetPinState extends State<SetPin> {
-  String _fullName = "Loading..."; // ✅ Declare _fullName
+  String _fullName = "Loading...";
   final List<TextEditingController> _controllers = List.generate(4, (_) => TextEditingController());
   bool isButtonActive = false;
 
@@ -23,16 +23,11 @@ class _SetPinState extends State<SetPin> {
       isButtonActive =
           _controllers.every((controller) => controller.text.isNotEmpty);
     });
-
-    if (isButtonActive) {
-      final pin = _controllers.map((c) => c.text).join();
-    }
   }
   Future<void> _loadUserName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _fullName =
-          prefs.getString("full_name") ?? "User"; // ✅ Load name dynamically
+      _fullName = prefs.getString("full_name") ?? "User";
     });
   }
   @override
@@ -54,19 +49,15 @@ class _SetPinState extends State<SetPin> {
 
   void _onKeyPress(String value) {
     setState(() {
+      // Find the last controller with text for backspace
       if (value == 'backspace') {
-        for (int i = 3; i >= 0; i--) {
-          if (_controllers[i].text.isNotEmpty) {
-            _controllers[i].clear();
-            break;
-          }
-        }
+        final lastFilledController = _controllers.lastWhere((c) => c.text.isNotEmpty, orElse: () => _controllers.first);
+        lastFilledController.clear();
       } else {
-        for (int i = 0; i < 4; i++) {
-          if (_controllers[i].text.isEmpty) {
-            _controllers[i].text = value;
-            break;
-          }
+        // Find the first empty controller to fill
+        final firstEmptyController = _controllers.firstWhere((c) => c.text.isEmpty, orElse: () => _controllers.last);
+        if(firstEmptyController.text.isEmpty) {
+          firstEmptyController.text = value;
         }
       }
     });
@@ -86,15 +77,6 @@ class _SetPinState extends State<SetPin> {
         ),
       ),
     );
-
-    // Simulate network delay and process
-    await Future.delayed(const Duration(seconds: 2));
-
-    // Save card status
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('has_card', true);
-    await prefs.setString('_fullname', _fullName); // optional: save name
-
     // Close the loading dialog
     if (context.mounted) Navigator.of(context).pop();
 
@@ -103,7 +85,7 @@ class _SetPinState extends State<SetPin> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const CustomDialogWidget(),
+        builder: (context) => CustomDialogWidget(),
       );
     }
   }
@@ -157,10 +139,10 @@ class _SetPinState extends State<SetPin> {
                   width: 50,
                   child: TextField(
                     obscureText: true,
-                    controller: _controllers[index],
-                    textAlign: TextAlign.center, // Prevent manual typing
+                    controller: _controllers[index], // Prevent manual typing
+                    textAlign: TextAlign.center,
                     maxLength: 1,
-                    readOnly: true, // Prevent manual typing
+                    readOnly: true,
                     style: const TextStyle(fontSize: 24),
                     decoration: InputDecoration(
                       counterText: "", // Hides the max length counter
@@ -204,46 +186,34 @@ class _SetPinState extends State<SetPin> {
                 itemCount: 12,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3, // Number of columns
-                  mainAxisSpacing: 8, // Vertical spacing
+                  mainAxisSpacing: 8,
                   crossAxisSpacing: 10, // Horizontal spacing
                   childAspectRatio: 1.8, // Adjust size of each key
                 ),
                 itemBuilder: (context, index) {
                   String keyValue;
+                  Widget keyChild;
+
                   if (index < 9) {
                     keyValue = '${index + 1}';
+                    keyChild = Text(keyValue, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold));
                   } else if (index == 9) {
                     keyValue = '';
+                    keyChild = const SizedBox(); // Empty space
                   } else if (index == 10) {
                     keyValue = '0';
+                    keyChild = Text(keyValue, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold));
                   } else {
                     keyValue = 'backspace';
+                    keyChild = const Icon(Icons.backspace_outlined, size: 24);
                   }
 
                   return GestureDetector(
-                    onTap: keyValue.isEmpty
-                        ? null
-                        : () {
-                      _onKeyPress(keyValue);
-                    },
+                    onTap: keyValue.isEmpty ? null : () => _onKeyPress(keyValue),
                     child: Container(
-                      decoration: BoxDecoration(
-                        color: keyValue == 'backspace'
-                            ? Colors.grey[300]
-                            : Colors.white,
-                        border: Border.all(color: Colors.grey.shade400),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
                       alignment: Alignment.center,
-                      child: keyValue == 'backspace'
-                          ? const Icon(Icons.backspace_outlined, size: 24)
-                          : Text(
-                        keyValue,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      decoration: BoxDecoration( color: keyValue == 'backspace' ? Colors.grey[300] : Colors.white, border: Border.all(color: Colors.grey.shade400), borderRadius: BorderRadius.circular(8)),
+                      child: keyChild,
                     ),
                   );
                 },
@@ -256,11 +226,22 @@ class _SetPinState extends State<SetPin> {
   }
 }
 
-class CustomDialogWidget extends StatelessWidget {
-  const CustomDialogWidget({Key? key}) : super(key: key);
+class CustomDialogWidget extends StatefulWidget {
+  CustomDialogWidget({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  State<CustomDialogWidget> createState() => _CustomDialogWidgetState();
+}
+
+class _CustomDialogWidgetState extends State<CustomDialogWidget> {
+  @override
+  void initState() {
+    super.initState();
+    _navigateToCardScreen();
+  }
+
+  void _navigateToCardScreen() {
+
     Future.delayed(const Duration(seconds: 3), () {
       if (context.mounted) {
         Navigator.of(context).pop(); // Close the dialog
@@ -270,6 +251,11 @@ class CustomDialogWidget extends StatelessWidget {
         );
       }
     });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20), // Ensure rounded corners

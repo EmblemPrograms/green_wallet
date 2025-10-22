@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:green_wallet/Card/hompage.dart';
+import 'package:green_wallet/Card/homepage.dart';
 
 class Topupd extends StatefulWidget {
   final double fundAmount;
@@ -146,7 +146,7 @@ class CustomDialogWidget extends StatelessWidget {
         Navigator.of(context).pop(); // Close the dialog
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => hompage()),
+          MaterialPageRoute(builder: (context) => HomeContainer()),
         );
       }
     });

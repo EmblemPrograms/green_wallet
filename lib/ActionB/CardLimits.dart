@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:green_wallet/Card/hompage.dart';
+import 'package:green_wallet/Card/homepage.dart';
 import 'package:intl/intl.dart';
 
 class CardLimits extends StatefulWidget {
@@ -135,7 +135,7 @@ class _CardLimitsState extends State<CardLimits> {
                 );
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => hompage()),
+                  MaterialPageRoute(builder: (context) => HomeContainer()),
                 );
               },
               child: Text(

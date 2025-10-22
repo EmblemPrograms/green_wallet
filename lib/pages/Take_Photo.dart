@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:green_wallet/pages/IDVerify.dart';
-import 'package:green_wallet/pages/Setup_pin.dart';
+import 'package:green_wallet/KycTier2/IDVerify.dart';
+import 'package:green_wallet/KycTier2/Setup_pin.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';

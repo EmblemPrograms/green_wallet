@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:green_wallet/pages/BVN_entry.dart';
+import 'package:green_wallet/KycTier1/BVN_entry.dart';
 
 class CustomDialogWidget extends StatelessWidget {
   const CustomDialogWidget({super.key});

@@ -3,7 +3,7 @@ import 'package:green_wallet/widgets/Navigation_bar.dart';
 import 'package:green_wallet/Card/Invoice.dart';
 import 'package:green_wallet/Card/NCard.dart';
 import 'package:green_wallet/Card/Profile.dart';
-import 'package:green_wallet/Card/hompage.dart';
+import 'package:green_wallet/Card/homepage.dart';
 
 import 'addb.dart';
 
@@ -19,7 +19,7 @@ class _CardsBeneficiariesPageState extends State<CardsBeneficiariesPage> {
 
   // List of screens (widgets) for navigation
   final List<Widget> _pages = [
-    const homepage(),
+    const HomepageScreen(),
     const NCard(),
     const Invoice(),
     const Profile(),

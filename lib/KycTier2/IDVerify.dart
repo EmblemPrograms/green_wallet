@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:green_wallet/Card/hompage.dart';
+import 'package:green_wallet/Card/homepage.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../services/auth_service.dart';

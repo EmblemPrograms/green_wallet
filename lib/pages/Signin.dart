@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:green_wallet/Card/hompage.dart';
+import 'package:green_wallet/Card/homepage.dart';
 
 import '../services/auth_service.dart';
 import 'forgetPass.dart';
@@ -76,7 +76,7 @@ class _SigninState extends State<Signin> {
           Navigator.of(context).pop(); // close dialog
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => hompage()),
+            MaterialPageRoute(builder: (context) => HomeContainer()),
           );
         });
       } else {
@@ -110,11 +110,13 @@ class _SigninState extends State<Signin> {
 
         // 🟢 Save profile info
         await AuthService.saveUserProfile(
-          data['full_name'] ?? "User",
-          data['email'] ?? "Unknown",
-          data['bvn'] ?? "Unknown",
-          data['selfie'] ?? "Unknown",
+          fullName: data['full_name'] ?? "User",
+          email: data['email'] ?? "Unknown",
+          bvn: data['bvn'] ?? "Unknown",
+          selfie: data['selfie'] ?? "Unknown",
+          cardId: data['card_id'] ?? "", // you can pass empty if not available yet
         );
+
 
         // 🟣 Save KYC tier (added)
         await AuthService.saveKycTier(

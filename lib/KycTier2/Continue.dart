@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:green_wallet/pages/Notice.dart';
-import 'package:green_wallet/pages/NoticeID.dart';
+import 'package:green_wallet/KycTier2/Notice.dart';
+import 'package:green_wallet/KycTier2/NoticeID.dart';
 
 class Continue extends StatefulWidget {
   const Continue({super.key});

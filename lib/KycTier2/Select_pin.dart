@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:green_wallet/pages/Setup_pin.dart';
-import 'package:green_wallet/Card/hompage.dart';
+import 'package:green_wallet/KycTier2/Setup_pin.dart';
+import 'package:green_wallet/Card/homepage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -118,7 +118,7 @@ class _SelectPinState extends State<SelectPin> {
         );
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => hompage()),
+          MaterialPageRoute(builder: (context) => HomeContainer()),
         );
       } else {
         print("❌ Server Error: ${response.statusCode}");
@@ -327,7 +327,7 @@ class CustomDialogWidget extends StatelessWidget {
         Navigator.of(context).pop(); // Close the dialog
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-              builder: (context) => hompage()), // Pass required parameter
+              builder: (context) => HomeContainer()), // Pass required parameter
         );
       }
     });

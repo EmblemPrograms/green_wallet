@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../services/auth_service.dart';
-import '../Card/hompage.dart';
+import '../Card/homepage.dart';
 import 'Setup_pin.dart';
 
 class Selfie extends StatefulWidget {

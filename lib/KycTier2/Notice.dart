@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:green_wallet/pages/IDVerify.dart';
-import 'package:green_wallet/pages/Continue.dart';
+import 'package:green_wallet/KycTier2/IDVerify.dart';
+import 'package:green_wallet/KycTier2/Continue.dart';
 
 class Notice extends StatefulWidget {
   const Notice({super.key});

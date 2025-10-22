@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:green_wallet/Card/hompage.dart';
+import 'package:green_wallet/Card/homepage.dart';
 
 
 class ReviewD extends StatefulWidget {
@@ -145,7 +145,7 @@ class _ReviewDState extends State<ReviewD> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => hompage(), // Pass USD amount
+                        builder: (context) => HomeContainer(), // Pass USD amount
                       ),
                     );
                   },

@@ -10,24 +10,24 @@ import 'package:green_wallet/Card/Profile.dart';
 import 'package:green_wallet/services/auth_service.dart';
 import 'package:green_wallet/widgets/Navigation_bar.dart';
 import 'package:green_wallet/widgets/profileheader.dart';
-import 'package:green_wallet/pages/NoticeID.dart';
+import 'package:green_wallet/KycTier2/NoticeID.dart';
 import 'package:http/http.dart' as http;
 
 // Helper method for bottom navigation items
 
-class hompage extends StatefulWidget {
-  const hompage({super.key});
+class HomeContainer extends StatefulWidget {
+  const HomeContainer({super.key});
 
   @override
-  State<hompage> createState() => _hompageState();
+  State<HomeContainer> createState() => _HomeContainerState();
 }
 
-class _hompageState extends State<hompage> {
+class _HomeContainerState extends State<HomeContainer> {
   int _selectedIndex = 0;
 
   // List of screens (widgets) for navigation
   final List<Widget> _pages = [
-    const homepage(),
+    const HomepageScreen(),
     const NCard(),
     const Invoice(),
     const Profile(),
@@ -71,22 +71,26 @@ Widget _buildActionButton(IconData icon, String label, VoidCallback onTap) {
   );
 }
 
-class homepage extends StatefulWidget {
-  const homepage({super.key});
+class HomepageScreen extends StatefulWidget {
+  const HomepageScreen({super.key});
 
   @override
-  State<homepage> createState() => _homepageState();
+  State<HomepageScreen> createState() => _HomepageScreenState();
 }
 
-class _homepageState extends State<homepage> {
+class _HomepageScreenState extends State<HomepageScreen> {
   bool _isObscured = true;
   String _fullName = "Loading..."; // Default value
   String _kycTier = "0"; // Default: not verified
+  bool _isLoadingUser = false;
 
   @override
   void initState() {
     super.initState();
-    _loadUserData();
+    if (!_isLoadingUser) {
+      _isLoadingUser = true;
+      _loadUserData();
+    }
   }
 
   Future<void> _loadUserData() async {
@@ -104,18 +108,24 @@ class _homepageState extends State<homepage> {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-
+      if (!mounted) return;
+      setState(() {
+        _fullName = data['full_name'] ?? "User";
+        _kycTier = data['kyc_tier']?.toString() ?? "0";
+      });
       setState(() {
         _fullName = data['full_name'] ?? "User";
         _kycTier = data['kyc_tier']?.toString() ?? "0";
       });
 
       await AuthService.saveUserProfile(
-        data['full_name'] ?? "User",
-        data['email'] ?? "Unknown",
-        data['bvn'] ?? "Unknown",
-        data['selfie'] ?? "Unknown",
+        fullName: data['full_name'] ?? "User",
+        email: data['email'] ?? "Unknown",
+        bvn: data['bvn'] ?? "Unknown",
+        selfie: data['selfie'] ?? "Unknown",
+        cardId: data['card_id'] ?? "",
       );
+
 
       await AuthService.saveKycTier(_kycTier);
     } else {
@@ -347,38 +357,39 @@ class _homepageState extends State<homepage> {
               ),
             ],
           ),
-          const SizedBox(height: 40),
 
           // 🔸 Empty State Icon & Message
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.receipt_long_rounded,
-                  size: 60,
-                  color: Colors.grey.withOpacity(0.3),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  "No transactions yet",
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Colors.black54,
-                    fontWeight: FontWeight.w500,
+          Expanded(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.receipt_long_rounded,
+                    size: 60,
+                    color: Colors.grey.withOpacity(0.3),
                   ),
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  "Your recent transactions will appear here.",
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.black38,
+                  const SizedBox(height: 16),
+                  const Text(
+                    "No transactions yet",
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: Colors.black54,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 20),
-              ],
+                  const SizedBox(height: 4),
+                  const Text(
+                    "Your recent transactions will appear here.",
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.black38,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
             ),
           ),
         ],

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:green_wallet/pages/Select_pin.dart';
+import 'package:green_wallet/KycTier2/Select_pin.dart';
 
 class SetupPin extends StatefulWidget {
   const SetupPin({super.key});

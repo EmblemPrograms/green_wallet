@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import '../widgets/textborder.dart';
-import 'Signin.dart';
+import '../pages/Signin.dart';
 
 class BvnEntry extends StatefulWidget {
   const BvnEntry({super.key});

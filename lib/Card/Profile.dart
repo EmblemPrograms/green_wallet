@@ -12,7 +12,7 @@ import 'package:green_wallet/Card/NCard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:typed_data';
 import '../services/auth_service.dart';
-import 'hompage.dart';
+import 'homepage.dart';
 
 class ProfileP extends StatefulWidget {
   const ProfileP({super.key});
@@ -26,7 +26,7 @@ class _ProfilePState extends State<ProfileP> {
 
   // List of screens (widgets) for navigation
   final List<Widget> _pages = [
-    const homepage(),
+    const HomepageScreen(),
     const NCard(),
     const Invoice(),
     const Profile(),

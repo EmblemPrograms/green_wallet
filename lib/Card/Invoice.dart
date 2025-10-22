@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:green_wallet/Card/hompage.dart';
+import 'package:green_wallet/Card/homepage.dart';
 import 'package:green_wallet/widgets/Navigation_bar.dart';
 import 'package:green_wallet/InoviceCreation/Create_invoice.dart';
 
@@ -18,7 +18,7 @@ class _InvoicePState extends State<InvoiceP> {
 
   // List of screens (widgets) for navigation
   final List<Widget> _pages = [
-    const homepage(),
+    const HomepageScreen(),
     const NCard(),
     const Invoice(),
     const Profile(),
@@ -55,7 +55,7 @@ class _InvoiceState extends State<Invoice> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black),
           onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => const hompage()),);
+            Navigator.push(context, MaterialPageRoute(builder: (context) => const HomeContainer()),);
           },
         ),
         title: const Text(
