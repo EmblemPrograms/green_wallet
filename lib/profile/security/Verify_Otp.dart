@@ -8,7 +8,7 @@ import 'package:green_wallet/widgets/textborder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Otp extends StatefulWidget {
-  final String email; // Ensure this is present
+  final String email;
 
   const Otp({super.key, required this.email});
 
@@ -24,7 +24,7 @@ class _OtpState extends State<Otp> {
   bool isButtonActive = false;
 
   final List<TextEditingController> _otpControllers =
-      List.generate(4, (_) => TextEditingController());
+  List.generate(4, (_) => TextEditingController());
   final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
 
   void _checkOTPComplete() {
@@ -37,7 +37,7 @@ class _OtpState extends State<Otp> {
   @override
   void initState() {
     super.initState();
-    sendOtp(); // Send OTP immediately when screen loads
+    sendOtp();
     startTimer();
     for (var controller in _otpControllers) {
       controller.addListener(_checkOTPComplete);
@@ -69,7 +69,8 @@ class _OtpState extends State<Otp> {
   }
 
   Future<void> sendOtp() async {
-    final String apiUrl = "https://greenwallet-6a1m.onrender.com/api/users/send-otp";
+    final String apiUrl =
+        "https://greenwallet-6a1m.onrender.com/api/users/send-otp";
 
     try {
       setState(() {
@@ -109,6 +110,7 @@ class _OtpState extends State<Otp> {
       );
     }
   }
+
   Future<void> verifyOTP() async {
     final String enteredOTP = _otpControllers.map((c) => c.text).join();
 
@@ -124,7 +126,7 @@ class _OtpState extends State<Otp> {
         "?email=${widget.email}&otp=$enteredOTP";
 
     try {
-      FocusScope.of(context).unfocus(); // Hide keyboard before sending request
+      FocusScope.of(context).unfocus();
 
       setState(() {
         _isLoading = true;
@@ -142,24 +144,19 @@ class _OtpState extends State<Otp> {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        // ✅ OTP verified successfully
-        String token = data['token']; // Extract token
-
-        // ✅ Save token for later authentication
+        String token = data['token'];
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString("auth_token", token);
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("OTP Verified! Continue Registration.")),
+          const SnackBar(content: Text("OTP Verified! Change Your Pin.")),
         );
 
-        // Navigate to Setup page
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => SelectPin()),
+          MaterialPageRoute(builder: (context) => ChangePin()),
         );
       } else {
-        // ❌ OTP verification failed
         setState(() {
           invalidOtp = true;
         });
@@ -225,9 +222,7 @@ class _OtpState extends State<Otp> {
         actions: [
           IconButton(
             icon: const Icon(Icons.headphones),
-            onPressed: () {
-              // Add support functionality here
-            },
+            onPressed: () {},
           ),
         ],
       ),
@@ -251,8 +246,6 @@ class _OtpState extends State<Otp> {
                   const SizedBox(height: 10),
                   Text(
                     "Verifying OTP for ${widget.email}",
-                    // Show email from CreateAccount
-                    textAlign: TextAlign.start,
                     style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                   ),
                 ],
@@ -268,15 +261,14 @@ class _OtpState extends State<Otp> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: List.generate(4, (index) => _otpField(index)),
                   ),
-                  const SizedBox(height: 10),
                   const SizedBox(height: 30),
                   ElevatedButton(
                     onPressed: isButtonActive ? verifyOTP : null,
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(310, 50),
-                      backgroundColor:
-                          isButtonActive ? const Color(0xFF3F2771) : Colors.grey,
-                      // Change color based on field status // Disabled color
+                      backgroundColor: isButtonActive
+                          ? const Color(0xFF3F2771)
+                          : Colors.grey,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(25),
                       ),
@@ -288,9 +280,9 @@ class _OtpState extends State<Otp> {
                     child: _isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
                         : const Text(
-                            "Verify",
-                            style: TextStyle(fontSize: 16, color: Colors.white),
-                          ),
+                      "Verify",
+                      style: TextStyle(fontSize: 16, color: Colors.white),
+                    ),
                   ),
                   const SizedBox(height: 20),
                   Text(
@@ -312,12 +304,12 @@ class _OtpState extends State<Otp> {
                       TextButton(
                         onPressed: secondsRemaining == 0
                             ? () {
-                                setState(() {
-                                  secondsRemaining = 59;
-                                  startTimer();
-                                });
-                                sendOtp(); //resend otp
-                              }
+                          setState(() {
+                            secondsRemaining = 59;
+                            startTimer();
+                          });
+                          sendOtp();
+                        }
                             : null,
                         child: Text(
                           "Resend",
@@ -340,37 +332,46 @@ class _OtpState extends State<Otp> {
     );
   }
 
+  /// ✅ Fixed OTP Field with smooth backspace handling
   Widget _otpField(int index) {
     return SizedBox(
       width: 50,
       height: 60,
-      child: TextFormField(
-        controller: _otpControllers[index],
-        focusNode: _focusNodes[index],
-        textAlign: TextAlign.center,
-        style: const TextStyle(fontSize: 24),
-        keyboardType: TextInputType.number,
-        inputFormatters: [
-          LengthLimitingTextInputFormatter(1),
-          FilteringTextInputFormatter.digitsOnly,
-        ],
-        onChanged: (value) {
-          if (value.isEmpty) {
-            if (index > 0) {
+      child: RawKeyboardListener(
+        focusNode: FocusNode(),
+        onKey: (event) {
+          if (event.isKeyPressed(LogicalKeyboardKey.backspace)) {
+            if (_otpControllers[index].text.isEmpty && index > 0) {
               FocusScope.of(context).requestFocus(_focusNodes[index - 1]);
-            }
-          } else {
-            if (value.isNotEmpty && index < 3) {
-              FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
+              _otpControllers[index - 1].selection = TextSelection.fromPosition(
+                TextPosition(offset: _otpControllers[index - 1].text.length),
+              );
             }
           }
         },
-        decoration: InputDecoration(
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
+        child: TextFormField(
+          controller: _otpControllers[index],
+          focusNode: _focusNodes[index],
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 24),
+          keyboardType: TextInputType.number,
+          inputFormatters: [
+            LengthLimitingTextInputFormatter(1),
+            FilteringTextInputFormatter.digitsOnly,
+          ],
+          onChanged: (value) {
+            if (value.isNotEmpty && index < 3) {
+              FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
+            }
+            _checkOTPComplete();
+          },
+          decoration: InputDecoration(
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
         ),
       ),
     );
   }
-  }
+}

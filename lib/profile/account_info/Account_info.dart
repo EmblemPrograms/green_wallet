@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:green_wallet/pages/AccountSetup.dart';
 import 'package:green_wallet/profile/account_info/your_info.dart';
 import 'address.dart';
 import 'kin.dart';
@@ -72,6 +73,28 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
                 );// Handle tap
               },
             ),
+            Spacer(),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const Setup(),
+                    ));
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF402978),
+                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+              ),
+              child: const Text(
+                'Finish Account Setup For First Users Only!!!',
+                style: TextStyle(fontSize: 16, color: Colors.white),
+              ),
+            ),
+            SizedBox(height: 20),
           ],
         ),
       ),

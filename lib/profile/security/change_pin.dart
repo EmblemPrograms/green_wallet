@@ -1,19 +1,17 @@
 import 'dart:convert';
 import 'Select_pin.dart';
 import 'package:flutter/material.dart';
-import 'package:green_wallet/profile/security/security.dart';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 
-class SelectPin extends StatefulWidget {
-  const SelectPin({super.key});
+class ChangePin extends StatefulWidget {
+  const ChangePin({super.key});
 
   @override
-  State<SelectPin> createState() => _SelectPinState();
+  State<ChangePin> createState() => _ChangePinState();
 }
 
-class _SelectPinState extends State<SelectPin> {
+class _ChangePinState extends State<ChangePin> {
   final List<TextEditingController> _controllers =
   List.generate(4, (_) => TextEditingController());
   final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
@@ -47,94 +45,16 @@ class _SelectPinState extends State<SelectPin> {
   }
 
   Future<void> _savePin() async {
-    if (!isButtonActive) return; // Prevents clicking when PIN is incomplete
+    if (!isButtonActive) return;
 
-    setState(() {
-      _isLoading = true;
-    });
+    final String oldPin = _controllers.map((c) => c.text).join();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString("old_pin", oldPin);
 
-    final String pin =
-    _controllers.map((c) => c.text).join(); // Combine PIN digits
-
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? token = prefs.getString("auth_token");
-
-      if (token == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text("Authentication error. ")),
-        );
-        return;
-      }
-
-      final String apiUrl =
-          "https://greenwallet-6a1m.onrender.com/api/users/users/pin/set?token=$token";
-
-      final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: {
-          "accept": "application/json",
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode({"pin": pin}),
-      );
-
-      setState(() {
-        _isLoading = false;
-      });
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        String fullName = data['user']['full_name'] ?? "User";
-        await prefs.setString("full_name", fullName);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data['message'] ?? "PIN set successfully!")),
-        );
-
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) {
-            return Dialog(
-              backgroundColor: Colors.transparent,
-              child: Center(
-                child: CircularProgressIndicator(
-                  color: Color(0xFF3F2771),
-                ),
-              ),
-            );
-          },
-        );
-
-        // Simulate loading
-        await Future.delayed(Duration(seconds: 2));
-        // ✅ Navigate to the homepage
-        Navigator.of(context).pop(); // Close the loading dialog
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => SelectPin()),
-        );
-      } else {
-        print("❌ Server Error: ${response.statusCode}");
-        print("❌ Response Body: ${response.body}");
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text("Error: ${response.statusCode}, ${response.body}")),
-        );
-      }
-    } catch (error) {
-      setState(() {
-        _isLoading = false;
-      });
-
-      print("❌ Network Error: $error");
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Network error, try again!")),
-      );
-    }
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => SelectPin()),
+    );
   }
 
   void _onKeyPress(String value) {
@@ -238,38 +158,6 @@ class _SelectPinState extends State<SelectPin> {
             // "Next" Button
             ElevatedButton(
               onPressed: _isLoading ? null : _savePin, // ✅ Call API function
-              // onPressed: isButtonActive
-              //     ? () async {
-              //   // Handle PIN submission
-              //   final pin = _controllers.map((c) => c.text).join();
-              //   print("Entered PIN: $pin");
-              //   showDialog(
-              //     context: context,
-              //     barrierDismissible: false,
-              //     builder: (context) {
-              //       return Dialog(
-              //         backgroundColor: Colors.transparent,
-              //         child: Center(
-              //           child: CircularProgressIndicator(
-              //             color: Color(0xFF3F2771),
-              //           ),
-              //         ),
-              //       );
-              //     },
-              //   );
-              //
-              //   // Simulate loading
-              //   await Future.delayed(Duration(seconds: 2));
-              //   Navigator.of(context).pop(); // Close the loading dialog
-              //
-              //   // Show CustomDialogWidget
-              //   showDialog(
-              //     context: context,
-              //     barrierDismissible: false,
-              //     builder: (context) => CustomDialogWidget(),
-              //   );
-              // }
-              //     : null,
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
                 backgroundColor:
@@ -343,72 +231,3 @@ class _SelectPinState extends State<SelectPin> {
   }
 }
 
-class CustomDialogWidget extends StatelessWidget {
-  const CustomDialogWidget({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    Future.delayed(Duration(seconds: 3), () {
-      if (context.mounted) {
-        Navigator.of(context).pop(); // Close the dialog
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-              builder: (context) => SecuritySettingsScreen()), // Pass required parameter
-        );
-      }
-    });
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20), // Ensure rounded corners
-      ),
-      child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 0),
-        padding: EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black26,
-              blurRadius: 10,
-              offset: Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Success icon
-            Image.asset(
-              'assets/Done.png', // Ensure this path matches your file location
-              height: 150,
-              width: 150,
-            ),
-            SizedBox(height: 0),
-            // Title
-            Text(
-              "PIN Updated Successfully",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 8),
-            // Subtitle
-            Text(
-              "Please keep it safe and do not share it with anyone",
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.black54,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 8),
-          ],
-        ),
-      ),
-    );
-  }
-}

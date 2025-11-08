@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:green_wallet/pages/Signin.dart';
 import 'package:green_wallet/profile/account_info/Account_info.dart';
 import 'package:green_wallet/profile/cardbf.dart';
 import 'package:green_wallet/profile/help.dart';
@@ -178,30 +179,52 @@ class _ProfileState extends State<Profile> {
                     Center(
                       child: TextButton(
                         onPressed: () async {
-                          // showDialog(
-                          //   context: context,
-                          //   barrierDismissible: false,
-                          //   builder: (context) {
-                          //     return Dialog(
-                          //       backgroundColor: Colors.transparent,
-                          //       child: Center(
-                          //         child: CircularProgressIndicator(
-                          //           color: Color(0xFF3F2771),
-                          //         ),
-                          //       ),
-                          //     );
-                          //   },
-                          // );
+                          // Show loading dialog
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (context) {
+                              return const Dialog(
+                                backgroundColor: Colors.transparent,
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    color: Color(0xFF3F2771),
+                                  ),
+                                ),
+                              );
+                            },
+                          );
 
-                          // Simulate loading
-                          // await Future.delayed(Duration(seconds: 2));
-                          // Navigator.of(context).pop();
-                          // Navigator.push(context, MaterialPageRoute(builder: (context) => const Startup()),);
+                          // Simulate delay
+                          await Future.delayed(const Duration(seconds: 2));
+
+                          // 🔑 Clear user session data
+                          final prefs = await SharedPreferences.getInstance();
+                          await prefs.remove("auth_token");
+                          await prefs.remove("full_name");
+                          await prefs.remove("email");
+                          await prefs.remove("wallet_balance");
+                          await prefs.remove("old_pin");
+
+                          // Close loading dialog
+                          Navigator.of(context).pop();
+
+                          // Navigate to Startup page
+                          if (context.mounted) {
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(builder: (context) => const Signin()),
+                                  (route) => false, // Remove all previous pages from stack
+                            );
+                          }
                         },
                         child: const Text(
                           "Log Out",
                           style: TextStyle(
-                              color: Colors.red, fontWeight: FontWeight.bold),
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
                       ),
                     ),

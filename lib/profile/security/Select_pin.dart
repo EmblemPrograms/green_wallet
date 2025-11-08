@@ -1,7 +1,5 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:green_wallet/Card/homepage.dart';
 import 'package:green_wallet/profile/security/security.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -48,101 +46,69 @@ class _SelectPinState extends State<SelectPin> {
   }
 
   Future<void> _savePin() async {
-    if (!isButtonActive) return; // Prevents clicking when PIN is incomplete
+    if (!isButtonActive) return;
 
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
-    final String pin =
-        _controllers.map((c) => c.text).join(); // Combine PIN digits
+    final String newPin = _controllers.map((c) => c.text).join();
+    final prefs = await SharedPreferences.getInstance();
+    final String? oldPin = prefs.getString("old_pin");
+    final String? token = prefs.getString("auth_token");
+
+    if (token == null || oldPin == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Authentication or old PIN missing.")),
+      );
+      setState(() => _isLoading = false);
+      return;
+    }
+
+    final String apiUrl =
+        "https://greenwallet-6a1m.onrender.com/api/users/users/pin/change?token=$token";
 
     try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? token = prefs.getString("auth_token");
-
-      if (token == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text("Authentication error. ")),
-        );
-        return;
-      }
-
-      final String apiUrl =
-          "https://greenwallet-6a1m.onrender.com/api/users/users/pin/set?token=$token";
-
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {
           "accept": "application/json",
           "Content-Type": "application/json",
         },
-        body: jsonEncode({"pin": pin}),
+        body: jsonEncode({
+          "old_pin": oldPin,
+          "new_pin": newPin,
+        }),
       );
 
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        String fullName = data['user']['full_name'] ?? "User";
-        await prefs.setString("full_name", fullName);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data['message'] ?? "PIN set successfully!")),
+          SnackBar(content: Text(data["message"] ?? "PIN changed successfully")),
         );
 
-        showDialog(
-              context: context,
-              barrierDismissible: false,
-              builder: (context) {
-                return Dialog(
-                  backgroundColor: Colors.transparent,
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      color: Color(0xFF3F2771),
-                    ),
-                  ),
-                );
-              },
-            );
+        prefs.remove("old_pin"); // cleanup old pin
 
-            // Simulate loading
-            await Future.delayed(Duration(seconds: 2));
-        // ✅ Navigate to the homepage
-        Navigator.of(context).pop(); // Close the loading dialog
-        // Show CustomDialogWidget
         showDialog(
           context: context,
           barrierDismissible: false,
-          builder: (context) => CustomDialogWidget(),
-        );
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => HomeContainer()),
+          builder: (context) => const CustomDialogWidget(),
         );
       } else {
-        print("❌ Server Error: ${response.statusCode}");
-        print("❌ Response Body: ${response.body}");
-
+        print("❌ Error: ${response.statusCode}");
+        print("❌ Response: ${response.body}");
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text("Error: ${response.statusCode}, ${response.body}")),
+          SnackBar(content: Text("Error: ${response.body}")),
         );
       }
-    } catch (error) {
-      setState(() {
-        _isLoading = false;
-      });
-
-      print("❌ Network Error: $error");
-
+    } catch (e) {
+      setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Network error, try again!")),
+        SnackBar(content: Text("Network error: $e")),
       );
     }
   }
+
 
   void _onKeyPress(String value) {
     setState(() {
@@ -190,7 +156,7 @@ class _SelectPinState extends State<SelectPin> {
 
             // Title
             const Text(
-              "Enter Current PIN!",
+              "Enter New PIN!",
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -202,7 +168,7 @@ class _SelectPinState extends State<SelectPin> {
 
             // Subtitle
             const Text(
-              "Enter your current 4–digit code",
+              "Enter your new 4–digit code",
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey,
@@ -245,38 +211,6 @@ class _SelectPinState extends State<SelectPin> {
             // "Next" Button
             ElevatedButton(
               onPressed: _isLoading ? null : _savePin, // ✅ Call API function
-              // onPressed: isButtonActive
-              //     ? () async {
-              //   // Handle PIN submission
-              //   final pin = _controllers.map((c) => c.text).join();
-              //   print("Entered PIN: $pin");
-              //   showDialog(
-              //     context: context,
-              //     barrierDismissible: false,
-              //     builder: (context) {
-              //       return Dialog(
-              //         backgroundColor: Colors.transparent,
-              //         child: Center(
-              //           child: CircularProgressIndicator(
-              //             color: Color(0xFF3F2771),
-              //           ),
-              //         ),
-              //       );
-              //     },
-              //   );
-              //
-              //   // Simulate loading
-              //   await Future.delayed(Duration(seconds: 2));
-              //   Navigator.of(context).pop(); // Close the loading dialog
-              //
-              //   // Show CustomDialogWidget
-              //   showDialog(
-              //     context: context,
-              //     barrierDismissible: false,
-              //     builder: (context) => CustomDialogWidget(),
-              //   );
-              // }
-              //     : null,
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
                 backgroundColor:
@@ -394,7 +328,7 @@ class CustomDialogWidget extends StatelessWidget {
             SizedBox(height: 0),
             // Title
             Text(
-              "PIN Updated Successfully",
+              "PIN Changed Successfully",
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,

@@ -344,33 +344,39 @@ class _OtpState extends State<Otp> {
     return SizedBox(
       width: 50,
       height: 60,
-      child: TextFormField(
-        controller: _otpControllers[index],
-        focusNode: _focusNodes[index],
-        textAlign: TextAlign.center,
-        style: const TextStyle(fontSize: 24),
-        keyboardType: TextInputType.number,
-        inputFormatters: [
-          LengthLimitingTextInputFormatter(1),
-          FilteringTextInputFormatter.digitsOnly,
-        ],
-        onChanged: (value) {
-          if (value.isEmpty) {
-            if (index > 0) {
+      child: RawKeyboardListener(
+        focusNode: FocusNode(),
+        onKey: (event) {
+          if (event.isKeyPressed(LogicalKeyboardKey.backspace)) {
+            if (_otpControllers[index].text.isEmpty && index > 0) {
               FocusScope.of(context).requestFocus(_focusNodes[index - 1]);
-            }
-          } else {
-            if (value.isNotEmpty && index < 3) {
-              FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
             }
           }
         },
-        decoration: InputDecoration(
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
+        child: TextFormField(
+          controller: _otpControllers[index],
+          focusNode: _focusNodes[index],
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 24),
+          keyboardType: TextInputType.number,
+          inputFormatters: [
+            LengthLimitingTextInputFormatter(1),
+            FilteringTextInputFormatter.digitsOnly,
+          ],
+          onChanged: (value) {
+            if (value.isNotEmpty && index < 3) {
+              FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
+            }
+            _checkOTPComplete();
+          },
+          decoration: InputDecoration(
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
         ),
       ),
     );
   }
-  }
+}
+
