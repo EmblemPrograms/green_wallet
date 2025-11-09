@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:green_wallet/ActionB/SendBngn.dart';
+import 'package:green_wallet/ActionB/send/SendBngn.dart';
+
+import 'bank.dart';
 
 class ngnSend extends StatefulWidget {
   const ngnSend({super.key});
@@ -44,25 +46,33 @@ class _ngnSendState extends State<ngnSend> {
             // Bank Selection
             const Text("Bank"),
             const SizedBox(height: 5),
-            DropdownButtonFormField<String>(
-              value: selectedBank,
-              decoration: InputDecoration(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-              hint: const Text("Select bank"),
-              onChanged: (value) {
-                setState(() {
-                  selectedBank = value;
-                });
-              },
-              items: banks.map((bank) {
-                return DropdownMenuItem<String>(
-                  value: bank,
-                  child: Text(bank),
+            GestureDetector(
+              onTap: () async {
+                // Navigate to bank list screen and wait for result
+                final selected = await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const BankList()),
                 );
-              }).toList(),
+
+                if (selected != null) {
+                  setState(() {
+                    selectedBank = selected; // Update selected bank
+                  });
+                }
+              },
+              child: AbsorbPointer(
+                child: TextFormField(
+                  controller: TextEditingController(text: selectedBank ?? ''),
+                  decoration: InputDecoration(
+                    labelText: "Select Bank",
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    suffixIcon: const Icon(Icons.arrow_drop_down),
+                  ),
+                ),
+              ),
             ),
+
             const SizedBox(height: 20),
 
             // Account Number Field

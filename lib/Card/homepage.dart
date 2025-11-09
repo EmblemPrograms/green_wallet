@@ -1,10 +1,7 @@
-// TODO Implement this library.import 'dart:convert';
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:green_wallet/ActionB/Convert.dart';
 import 'package:green_wallet/ActionB/MoreP.dart';
-import 'package:green_wallet/ActionB/Send.dart';
+import 'package:green_wallet/ActionB/send/Send.dart';
 import 'package:green_wallet/ActionB/TopUp.dart';
 import 'package:green_wallet/Card/Invoice.dart';
 import 'package:green_wallet/Card/NCard.dart';
@@ -14,6 +11,8 @@ import 'package:green_wallet/widgets/Navigation_bar.dart';
 import 'package:green_wallet/widgets/profileheader.dart';
 import 'package:green_wallet/KycTier2/NoticeID.dart';
 import 'package:http/http.dart' as http;
+
+import '../ActionB/convert/rates.dart';
 
 
 // Helper method for bottom navigation items
@@ -87,6 +86,8 @@ class _HomepageScreenState extends State<HomepageScreen> {
   String _kycTier = "0"; // Default: not verified
   bool _isLoadingUser = false;
   double _walletBalance = 0.0;
+  List<Transaction> _transactions = [];
+  bool _loadingTransactions = true;
 
   @override
   void initState() {
@@ -94,7 +95,11 @@ class _HomepageScreenState extends State<HomepageScreen> {
     if (!_isLoadingUser) {
       _isLoadingUser = true;
       _loadSavedBalance();
-      _loadUserData();
+      // ✅ Fetch and store profile (includes account_id)
+      AuthService.fetchAndSaveUserProfile().then((_) {
+        _loadUserData();        // Update UI with latest profile data
+        _fetchTransactions();   // ✅ Fetch transactions using saved account_id + token
+      });
     }
   }
 
@@ -162,6 +167,38 @@ class _HomepageScreenState extends State<HomepageScreen> {
       debugPrint("⚠️ Error fetching user data: $e");
     }
   }
+
+  Future<void> _fetchTransactions() async {
+    String? token = await AuthService.getToken();
+    String? accountId = await AuthService.getAccountId();
+
+    if (token == null || accountId == null) {
+      debugPrint("❌ Missing token or account ID");
+      return;
+    }
+    final url =
+        "https://greenwallet-6a1m.onrender.com/api/transactions/accounts/$accountId/transactions?token=$token";
+
+    try {
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+
+        setState(() {
+          _transactions = data.map((tx) => Transaction.fromJson(tx)).toList();
+          _loadingTransactions = false;
+        });
+      } else {
+        debugPrint("⚠️ Transaction fetch failed: ${response.body}");
+        setState(() => _loadingTransactions = false);
+      }
+    } catch (e) {
+      debugPrint("⚠️ Error fetching transactions: $e");
+      setState(() => _loadingTransactions = false);
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -303,7 +340,7 @@ class _HomepageScreenState extends State<HomepageScreen> {
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) =>
-                                              const Convert()),
+                                              const RatesScreen()),
                                     );
                                   }),
                                   _buildActionButton(Icons.send, "Send", () {
@@ -350,7 +387,12 @@ class _HomepageScreenState extends State<HomepageScreen> {
   Widget _buildTransactionSection() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.only(
+        top: 25,
+        bottom: 10,
+        left: 10,
+        right: 10,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
@@ -365,11 +407,9 @@ class _HomepageScreenState extends State<HomepageScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: 10,),
-          // 🔹 Header Row (Transaction History + View All)
-          Row(
+          const Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
+            children: [
               Text(
                 "Transaction History",
                 style: TextStyle(
@@ -388,45 +428,86 @@ class _HomepageScreenState extends State<HomepageScreen> {
               ),
             ],
           ),
+          const SizedBox(height: 10),
 
-          // 🔸 Empty State Icon & Message
-          Expanded(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.receipt_long_rounded,
-                    size: 60,
-                    color: Colors.grey.withOpacity(0.3),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    "No transactions yet",
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: Colors.black54,
-                      fontWeight: FontWeight.w500,
+          // 🔹 Show loading, empty or list
+          if (_loadingTransactions)
+            const Center(child: CircularProgressIndicator())
+          else if (_transactions.isEmpty)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.only(top: 20),
+                child: Text(
+                  "No transactions yet",
+                  style: TextStyle(color: Colors.black45),
+                ),
+              ),
+            )
+          else
+            Expanded(
+              child: ListView.builder(
+                itemCount: _transactions.length,
+                itemBuilder: (context, index) {
+                  final tx = _transactions[index];
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 10, horizontal: 10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF9FAFB),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    "Your recent transactions will appear here.",
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.black38,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Colors.purple.shade50,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Icon(Icons.account_balance_wallet,
+                                  color: Color(0xFF6D28D9)),
+                            ),
+                            const SizedBox(width: 12),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  tx.reason,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: Color(0xFF1A1D1F)),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  "${tx.createdAt.hour}:${tx.createdAt.minute.toString().padLeft(2, '0')} PM",
+                                  style: const TextStyle(
+                                      fontSize: 12, color: Colors.grey),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        Text(
+                          "₦${tx.amount.toStringAsFixed(2)}",
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF1A1D1F)),
+                        ),
+                      ],
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 20),
-                ],
+                  );
+                },
               ),
             ),
-          ),
         ],
       ),
     );
   }
+
 
 // 🟢 Shown if KYC Tier 1 is already completed
   Widget _buildUpgradeToTier2() {
@@ -471,6 +552,38 @@ class _HomepageScreenState extends State<HomepageScreen> {
           ),
         ),
       ],
+    );
+  }
+}
+class Transaction {
+  final String id;
+  final String type;
+  final String reason;
+  final double amount;
+  final String currency;
+  final String status;
+  final DateTime createdAt;
+
+  Transaction({
+    required this.id,
+    required this.type,
+    required this.reason,
+    required this.amount,
+    required this.currency,
+    required this.status,
+    required this.createdAt,
+  });
+
+  factory Transaction.fromJson(Map<String, dynamic> json) {
+    final attrs = json['attributes'];
+    return Transaction(
+      id: json['id'],
+      type: json['type'],
+      reason: attrs['reason'] ?? 'No reason',
+      amount: (attrs['amount'] ?? 0).toDouble(),
+      currency: attrs['currency'] ?? 'NGN',
+      status: attrs['status'] ?? 'PENDING',
+      createdAt: DateTime.parse(attrs['createdAt']),
     );
   }
 }

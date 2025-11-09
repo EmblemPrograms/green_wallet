@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:green_wallet/ActionB/intSend.dart';
-import 'package:green_wallet/ActionB/ngnSend.dart';
+import 'package:green_wallet/ActionB/send/intSend.dart';
+import 'package:green_wallet/ActionB/send/ngnSend.dart';
 
 class Transfer extends StatefulWidget {
   const Transfer({super.key});

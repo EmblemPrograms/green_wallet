@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -11,21 +10,23 @@ class AuthService {
   static const _kycTierKey = 'kyc_tier';
   static const _selfieKey = 'selfie';
   static const _cardIdKey = 'card_id';
+  static const _walletBalanceKey = 'wallet_balance_ngn';
+
   // ✅ New keys for account & address details
+  static const _accountIdKey = 'account_id';
   static const _accountNameKey = 'account_name';
   static const _bankNameKey = 'bank_name';
   static const _accountNumberKey = 'account_number';
   static const _nipCodeKey = 'nip_code';
   static const _addressKey = 'address';
-  static const _walletBalanceKey = 'wallet_balance_ngn';
 
-// ✅ Save wallet balance
+  // ✅ Save wallet balance
   static Future<void> saveWalletBalance(double balance) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble(_walletBalanceKey, balance);
   }
 
-// ✅ Retrieve wallet balance
+  // ✅ Retrieve wallet balance
   static Future<double> getWalletBalance() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getDouble(_walletBalanceKey) ?? 0.0;
@@ -74,6 +75,7 @@ class AuthService {
       "bvn": prefs.getString(_bvnKey) ?? "",
       "selfie": prefs.getString(_selfieKey) ?? "",
       "card_id": prefs.getString(_cardIdKey) ?? "",
+      "account_id": prefs.getString(_accountIdKey) ?? "",
       "account_name": prefs.getString(_accountNameKey) ?? "",
       "bank_name": prefs.getString(_bankNameKey) ?? "",
       "account_number": prefs.getString(_accountNumberKey) ?? "",
@@ -82,8 +84,9 @@ class AuthService {
     };
   }
 
-  // ✅ Save Account & Address Details
+  // ✅ Save Account & Address Details (with account_id)
   static Future<void> saveAccountDetails({
+    required String accountId,
     required String accountName,
     required String bankName,
     required String accountNumber,
@@ -91,23 +94,22 @@ class AuthService {
     required String address,
   }) async {
     final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_accountIdKey, accountId);
     await prefs.setString(_accountNameKey, accountName);
     await prefs.setString(_bankNameKey, bankName);
     await prefs.setString(_accountNumberKey, accountNumber);
     await prefs.setString(_nipCodeKey, nipCode);
     await prefs.setString(_addressKey, address);
   }
-  //✅ Add this method inside AuthService:
+
+  // ✅ Fetch user profile and save all details (token-based)
   static Future<void> fetchAndSaveUserProfile() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString(_tokenKey);
 
-    if (token == null) {
-      throw Exception("No token found");
-    }
+    if (token == null) throw Exception("No token found");
 
-    final url = Uri.parse(
-        'https://greenwallet-6a1m.onrender.com/api/users/profile?token=$token');
+    final url = Uri.parse('https://greenwallet-6a1m.onrender.com/api/users/profile?token=$token');
 
     final response = await http.get(url, headers: {
       'accept': 'application/json',
@@ -128,10 +130,10 @@ class AuthService {
       );
 
       // ✅ Save account details (first deposit account)
-      if (data['deposit_accounts'] != null &&
-          data['deposit_accounts'].isNotEmpty) {
+      if (data['deposit_accounts'] != null && data['deposit_accounts'].isNotEmpty) {
         final account = data['deposit_accounts'][0];
         await saveAccountDetails(
+          accountId: account['account_id'] ?? '',
           accountName: account['account_name'] ?? '',
           bankName: account['bank_name'] ?? '',
           accountNumber: account['account_number'] ?? '',
@@ -145,8 +147,7 @@ class AuthService {
         await saveKycTier(data['kyc_tier']);
       }
     } else {
-      throw Exception(
-          'Failed to fetch user profile. Status: ${response.statusCode}');
+      throw Exception('Failed to fetch user profile. Status: ${response.statusCode}');
     }
   }
 
@@ -176,5 +177,10 @@ class AuthService {
   static Future<String?> getFullName() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_fullNameKey);
+  }
+
+  static Future<String?> getAccountId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_accountIdKey);
   }
 }

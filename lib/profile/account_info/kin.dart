@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:green_wallet/services/auth_service.dart'; // ✅ Ensure this file exists and has getToken()
 import 'package:http/http.dart' as http;
+import 'package:green_wallet/services/auth_service.dart';
 import 'package:green_wallet/widgets/textborder.dart';
 
 class Kin extends StatefulWidget {
@@ -14,12 +14,14 @@ class Kin extends StatefulWidget {
 class _KinState extends State<Kin> {
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
+  bool _isFetching = true;
 
-  String? _firstName;
-  String? _lastName;
+  // Controllers to prefill data
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
   String? _relationship;
-  String? _email;
-  String? _phone;
 
   final List<String> _relationshipOptions = [
     'Parent',
@@ -29,9 +31,49 @@ class _KinState extends State<Kin> {
     'Other',
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    _fetchProfileData();
+  }
+
+  Future<void> _fetchProfileData() async {
+    try {
+      final token = await AuthService.getToken();
+      if (token == null) {
+        _showSnackBar('Authentication error. Please log in again.', isError: true);
+        return;
+      }
+
+      final url =
+          'https://greenwallet-6a1m.onrender.com/api/users/profile?token=$token';
+      final response = await http.get(Uri.parse(url), headers: {'accept': 'application/json'});
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        if (data['next_of_kin'] != null) {
+          final kin = data['next_of_kin'];
+          setState(() {
+            _firstNameController.text = kin['first_name'] ?? '';
+            _lastNameController.text = kin['last_name'] ?? '';
+            _relationship = kin['relationship'] ?? '';
+            _emailController.text = kin['email'] ?? '';
+            _phoneController.text = kin['phone_number'] ?? '';
+          });
+        }
+      } else {
+        debugPrint("❌ Failed to fetch profile: ${response.body}");
+      }
+    } catch (e) {
+      debugPrint("⚠️ Error fetching profile: $e");
+    } finally {
+      setState(() => _isFetching = false);
+    }
+  }
+
   Future<void> _saveForm() async {
     if (!_formKey.currentState!.validate()) return;
-    _formKey.currentState!.save();
 
     setState(() => _isLoading = true);
 
@@ -46,11 +88,11 @@ class _KinState extends State<Kin> {
           "https://greenwallet-6a1m.onrender.com/api/users/users/next-of-kin?token=$token";
 
       final body = {
-        "first_name": _firstName,
-        "last_name": _lastName,
+        "first_name": _firstNameController.text.trim(),
+        "last_name": _lastNameController.text.trim(),
         "relationship": _relationship,
-        "email": _email,
-        "phone_number": "0${_phone?.trim()}" // ✅ ensures proper formatting
+        "email": _emailController.text.trim(),
+        "phone_number": _phoneController.text.trim(),
       };
 
       final response = await http.patch(
@@ -65,7 +107,6 @@ class _KinState extends State<Kin> {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         _showSnackBar(data['message'] ?? 'Next of Kin updated successfully!');
-        debugPrint("✅ Response: $data");
       } else {
         debugPrint("❌ Error: ${response.body}");
         _showSnackBar("Failed to update Next of Kin.", isError: true);
@@ -74,7 +115,7 @@ class _KinState extends State<Kin> {
       debugPrint("⚠️ Exception: $e");
       _showSnackBar("Something went wrong. Try again later.", isError: true);
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      setState(() => _isLoading = false);
     }
   }
 
@@ -86,6 +127,15 @@ class _KinState extends State<Kin> {
         duration: const Duration(seconds: 3),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    super.dispose();
   }
 
   @override
@@ -101,17 +151,19 @@ class _KinState extends State<Kin> {
         foregroundColor: Colors.black,
         elevation: 0,
       ),
-      body: Padding(
+      body: _isFetching
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
         padding: const EdgeInsets.all(20.0),
         child: Form(
           key: _formKey,
           child: ListView(
             children: [
-              _buildTextField('First Name', onSaved: (val) => _firstName = val),
-              _buildTextField('Last Name', onSaved: (val) => _lastName = val),
+              _buildTextField('First Name', controller: _firstNameController),
+              _buildTextField('Last Name', controller: _lastNameController),
               _buildDropdown(),
-              _buildTextField('Email Address', onSaved: (val) => _email = val),
-              _buildTextField('Phone Number', onSaved: (val) => _phone = val),
+              _buildTextField('Email Address', controller: _emailController),
+              _buildTextField('Phone Number', controller: _phoneController),
               const SizedBox(height: 30),
               ElevatedButton(
                 onPressed: _isLoading ? null : _saveForm,
@@ -136,18 +188,17 @@ class _KinState extends State<Kin> {
     );
   }
 
-  Widget _buildTextField(String label, {required Function(String?) onSaved}) {
+  Widget _buildTextField(String label, {required TextEditingController controller}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: TextFormField(
+        controller: controller,
         decoration: InputDecoration(
           labelText: label,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
           enabledBorder: Bcolor.enabledBorder,
         ),
-        onSaved: onSaved,
-        validator: (val) =>
-        (val == null || val.isEmpty) ? 'Please enter $label' : null,
+        validator: (val) => (val == null || val.isEmpty) ? 'Please enter $label' : null,
       ),
     );
   }
@@ -161,7 +212,9 @@ class _KinState extends State<Kin> {
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
           enabledBorder: Bcolor.enabledBorder,
         ),
-        value: _relationship,
+        value: _relationship != null && _relationship!.isNotEmpty
+            ? _relationship
+            : null,
         items: _relationshipOptions.map((String option) {
           return DropdownMenuItem<String>(
             value: option,
