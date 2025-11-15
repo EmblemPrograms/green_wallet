@@ -8,11 +8,11 @@ import 'package:green_wallet/profile/help.dart';
 import 'package:green_wallet/profile/noti.dart';
 import 'package:green_wallet/profile/security/security.dart';
 import 'package:green_wallet/widgets/Navigation_bar.dart';
-import 'package:green_wallet/Card/Invoice.dart';
 import 'package:green_wallet/Card/NCard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:typed_data';
 import '../services/auth_service.dart';
+import 'Transfer.dart';
 import 'homepage.dart';
 
 class ProfileP extends StatefulWidget {
@@ -29,7 +29,7 @@ class _ProfilePState extends State<ProfileP> {
   final List<Widget> _pages = [
     const HomepageScreen(),
     const MyCardsPage(),
-    const Invoice(),
+    const Transfer(),
     const Profile(),
   ];
 

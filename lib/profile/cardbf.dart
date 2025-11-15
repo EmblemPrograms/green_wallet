@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:green_wallet/widgets/Navigation_bar.dart';
-import 'package:green_wallet/Card/Invoice.dart';
 import 'package:green_wallet/Card/NCard.dart';
 import 'package:green_wallet/Card/Profile.dart';
 import 'package:green_wallet/Card/homepage.dart';
 
+import '../Card/Transfer.dart';
 import 'addb.dart';
 
 class CardsBeneficiariesPage extends StatefulWidget {
@@ -21,7 +21,7 @@ class _CardsBeneficiariesPageState extends State<CardsBeneficiariesPage> {
   final List<Widget> _pages = [
     const HomepageScreen(),
     const MyCardsPage(),
-    const Invoice(),
+    const Transfer(),
     const Profile(),
     const Cardse(),
   ];

@@ -3,8 +3,8 @@ import '../services/cardid_service.dart';
 import '../services/auth_service.dart';
 import '../widgets/Navigation_bar.dart';
 import 'Create_card.dart';
-import 'Invoice.dart';
 import 'Profile.dart';
+import 'Transfer.dart';
 import 'card_details.dart';
 import 'homepage.dart'; // 👈 Create this new file
 
@@ -31,7 +31,7 @@ class _NcardState extends State<Ncard> {
     final List<Widget> pages = [
       const HomepageScreen(),
       const MyCardsPage(),
-      const Invoice(),
+      const Transfer(),
       const Profile(),
     ];
     return Scaffold(

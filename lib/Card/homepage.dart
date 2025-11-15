@@ -1,11 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:green_wallet/ActionB/MoreP.dart';
-import 'package:green_wallet/ActionB/send/Send.dart';
 import 'package:green_wallet/ActionB/TopUp.dart';
-import 'package:green_wallet/Card/Invoice.dart';
 import 'package:green_wallet/Card/NCard.dart';
 import 'package:green_wallet/Card/Profile.dart';
+import 'package:green_wallet/Card/Transfer.dart';
 import 'package:green_wallet/services/auth_service.dart';
 import 'package:green_wallet/widgets/Navigation_bar.dart';
 import 'package:green_wallet/widgets/profileheader.dart';
@@ -40,7 +38,7 @@ class _HomeContainerState extends State<HomeContainer> {
     final List<Widget> pages = [
       const HomepageScreen(),
       const MyCardsPage(),
-      const Invoice(),
+      const Transfer(),
       const Profile(),
     ];
     return Scaffold(
@@ -343,14 +341,6 @@ class _HomepageScreenState extends State<HomepageScreen> {
                                               const RatesScreen()),
                                     );
                                   }),
-                                  _buildActionButton(Icons.send, "Send", () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              const Transfer()),
-                                    );
-                                  }),
                                   _buildActionButton(Icons.add, "Top-up", () {
                                     Navigator.push(
                                       context,
@@ -358,15 +348,7 @@ class _HomepageScreenState extends State<HomepageScreen> {
                                           builder: (context) => const Topup()),
                                     );
                                   }),
-                                  _buildActionButton(Icons.more_horiz, "More",
-                                      () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => const Morep()),
-                                    );
-                                  }),
-                                ],
+                                                                  ],
                               ),
                             ],
                           ),

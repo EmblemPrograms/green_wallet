@@ -1,7 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:green_wallet/ActionB/send/intSend.dart';
 import 'package:green_wallet/ActionB/send/ngnSend.dart';
-import 'package:green_wallet/ActionB/send/walletSend.dart'; // 👈 Add this import for wallet transfer page
+import 'package:green_wallet/ActionB/send/walletSend.dart';
+
+import 'NCard.dart';
+import 'Profile.dart';
+import 'homepage.dart';
+import '../widgets/Navigation_bar.dart'; // 👈 Add this import for wallet transfer page
+
+class TransferP extends StatefulWidget {
+  const TransferP({super.key});
+
+  @override
+  State<TransferP> createState() => _TransferPState();
+}
+
+class _TransferPState extends State<TransferP> {
+  int _selectedIndex = 2;
+
+  // List of screens (widgets) for navigation
+  final List<Widget> _pages = [
+    const HomepageScreen(),
+    const MyCardsPage(),
+    const Transfer(),
+    const Profile(),
+  ];
+  void _onNavItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _pages[_selectedIndex],
+      bottomNavigationBar: BottomNavBar(
+        selectedIndex: _selectedIndex,
+        onItemSelected: _onNavItemTapped,
+      ),
+    );
+  }
+}
 
 class Transfer extends StatefulWidget {
   const Transfer({super.key});
@@ -42,20 +81,7 @@ class _TransferState extends State<Transfer> {
                 "Send again",
                 style: TextStyle(fontSize: 14, color: Colors.grey),
               ),
-              const SizedBox(height: 10),
-
-              // Row for recent contacts
-              Row(
-                children: [
-                  _buildRecentContact("W", "🇳🇬"), // Nigeria
-                  const SizedBox(width: 15),
-                  _buildRecentContact("W", "🇺🇸"), // USA
-                  const SizedBox(width: 15),
-                  _buildRecentContact("W", "🇬🇧"), // UK
-                ],
-              ),
-
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
 
               // Wallet Transfer Section
               const Text(
@@ -117,44 +143,6 @@ class _TransferState extends State<Transfer> {
           ),
         ),
       ),
-    );
-  }
-
-  // Widget for recent contacts with country flag
-  Widget _buildRecentContact(String initial, String flag) {
-    return Column(
-      children: [
-        Stack(
-          alignment: Alignment.bottomRight,
-          children: [
-            CircleAvatar(
-              radius: 25,
-              backgroundColor: const Color(0xFF3F2771),
-              child: Text(
-                initial,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: 2,
-              right: 2,
-              child: Text(
-                flag,
-                style: const TextStyle(fontSize: 16),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 5),
-        const Text(
-          "Wisdom",
-          style: TextStyle(fontSize: 14),
-        ),
-      ],
     );
   }
 
