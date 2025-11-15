@@ -330,10 +330,10 @@ class _HomepageScreenState extends State<HomepageScreen> {
                               const SizedBox(height: 18),
                               Row(
                                 mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceEvenly,
                                 children: [
                                   _buildActionButton(
-                                      Icons.currency_exchange, "Convert", () {
+                                      Icons.currency_exchange, "Rates", () {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(

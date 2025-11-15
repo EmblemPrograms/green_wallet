@@ -24,8 +24,8 @@ class BottomNavBar extends StatelessWidget {
           children: [
             _buildBottomNavItem(Icons.home_rounded, "Home", 0),
             _buildBottomNavItem(Icons.credit_card, "Card", 1),
-            _buildBottomNavItem(Icons.send, "Transfer", 2),
-            _buildBottomNavItem(Icons.account_balance, "Settings", 3),
+            _buildBottomNavItem(Icons.money, "Transfer", 2),
+            _buildBottomNavItem(Icons.settings, "Settings", 3),
           ],
         ),
       ),

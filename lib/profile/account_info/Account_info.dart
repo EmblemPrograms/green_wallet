@@ -90,7 +90,7 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
                 ),
               ),
               child: const Text(
-                'Finish Account Setup For First Users Only!!!',
+                'Complete Account Setup',
                 style: TextStyle(fontSize: 16, color: Colors.white),
               ),
             ),

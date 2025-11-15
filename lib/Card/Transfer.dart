@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:green_wallet/ActionB/send/intSend.dart';
-import 'package:green_wallet/ActionB/send/ngnSend.dart';
-import 'package:green_wallet/ActionB/send/walletSend.dart';
-
+import 'package:green_wallet/send/intSend.dart';
+import 'package:green_wallet/send/ngnSend.dart';
+import 'package:green_wallet/send/walletSend.dart';
 import 'NCard.dart';
 import 'Profile.dart';
 import 'homepage.dart';
@@ -77,11 +76,7 @@ class _TransferState extends State<Transfer> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Send Again Section
-              const Text(
-                "Send again",
-                style: TextStyle(fontSize: 14, color: Colors.grey),
-              ),
-              const SizedBox(height: 20),
+                            const SizedBox(height: 10),
 
               // Wallet Transfer Section
               const Text(

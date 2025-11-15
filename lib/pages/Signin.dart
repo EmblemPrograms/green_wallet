@@ -151,7 +151,7 @@ class _SigninState extends State<Signin> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                "Welcome Back !",
+                "Welcome Back!",
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,

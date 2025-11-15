@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:green_wallet/ActionB/send/SendBint.dart';
+import 'package:green_wallet/send/SendBint.dart';
+
 
 class IntSend1 extends StatefulWidget {
   const IntSend1({super.key});

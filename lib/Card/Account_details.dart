@@ -176,8 +176,6 @@ Sort Code: ${_details["nip_code"]}
                       "Bank Name", _details["bank_name"] ?? ""),
                   _buildAccountDetailRow(
                       "Account Number", _details["account_number"] ?? ""),
-                  _buildAccountDetailRow(
-                      "Sort Code", _details["nip_code"] ?? ""),
                   const SizedBox(height: 20),
 
                   // Share button
